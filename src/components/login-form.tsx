@@ -18,7 +18,7 @@ export function LoginForm() {
     return (
         <div className="w-full max-w-xs mx-auto flex flex-col items-center">
             <div className="mb-8">
-                <Image src="https://placehold.co/250x90.png" alt="CAMOSA Logo" width={250} height={90} data-ai-hint="company logo black" />
+                <Image src="/camosaLOG.png" alt="CAMOSA Logo" width={250} height={90} />
             </div>
 
             <div className="text-center mb-8">
