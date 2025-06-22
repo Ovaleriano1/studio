@@ -31,7 +31,7 @@ export function ProfileCard() {
                 <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input id="email" type="email" value="juan.gomez@promaintain.com" readOnly className="pl-10" />
+                    <Input id="email" type="email" value="juan.gomez@camosaapp.com" readOnly className="pl-10" />
                 </div>
             </div>
             <div className="grid gap-2">

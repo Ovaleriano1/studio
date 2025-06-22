@@ -36,7 +36,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 p-2">
           <HardHat className="size-8 text-sidebar-primary" />
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold text-sidebar-primary font-headline">ProMaintain</h1>
+            <h1 className="text-lg font-bold text-sidebar-primary font-headline">CamosaApp Tecnicos</h1>
           </div>
         </div>
       </SidebarHeader>

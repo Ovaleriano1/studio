@@ -1,10 +1,11 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Settings as SettingsIcon } from 'lucide-react';
+import { Button } from './ui/button';
 
 export function SettingsView() {
   return (
@@ -54,6 +55,9 @@ export function SettingsView() {
           <Switch id="push-notifications" />
         </div>
       </CardContent>
+      <CardFooter className='border-t pt-6'>
+          <Button>Apply Changes</Button>
+      </CardFooter>
     </Card>
   );
 }
