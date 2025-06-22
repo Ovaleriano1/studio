@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +26,13 @@ const maintenanceFormSchema = z.object({
   equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
   hoursOnMachine: z.coerce.number().min(0, { message: 'Las horas deben ser un número positivo.' }),
   serviceType: z.enum(['scheduled', 'emergency', 'preventive'], { required_error: 'Por favor seleccione un tipo de servicio.' }),
+  workOrderNumber: z.string().optional(),
+  clientName: z.string().min(2, { message: "El nombre del cliente es requerido." }),
+  fluidCheck: z.enum(['ok', 'refill', 'na'], { required_error: 'Por favor seleccione el estado de los fluidos.' }),
+  tirePressure: z.string().min(2, "Por favor ingrese la presión de neumáticos."),
+  nextServiceDate: z.date().optional(),
   workPerformed: z.string().min(10, { message: 'Por favor describa el trabajo realizado (mínimo 10 caracteres).' }).max(500),
+  partsUsed: z.string().max(500).optional(),
   safetyCheckPassed: z.boolean().default(false).optional(),
 });
 
@@ -41,14 +48,16 @@ export function MaintenanceForm() {
       hoursOnMachine: 0,
       workPerformed: '',
       safetyCheckPassed: false,
+      workOrderNumber: '',
+      clientName: '',
+      partsUsed: '',
+      tirePressure: '',
     },
   });
 
   async function onSubmit(data: MaintenanceFormValues) {
-    // Here you would typically send the data to your server
     console.log(data);
 
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast({
@@ -169,6 +178,100 @@ export function MaintenanceForm() {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="workOrderNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número de Orden de Trabajo (Opcional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="OT-12345" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="clientName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre del Cliente</FormLabel>
+                    <FormControl>
+                      <Input placeholder="ACME Corp" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="fluidCheck"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Revisión de Fluidos</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione una opción" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ok">OK</SelectItem>
+                        <SelectItem value="refill">Requiere Relleno</SelectItem>
+                        <SelectItem value="na">No Aplica</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tirePressure"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Presión de Neumáticos</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Delanteros: 120 PSI, Traseros: 150 PSI" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="nextServiceDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Fecha del Próximo Servicio (Opcional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                          >
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
+                            <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <FormField
               control={form.control}
@@ -184,6 +287,24 @@ export function MaintenanceForm() {
                     />
                   </FormControl>
                   <FormDescription>Una descripción detallada de todos los servicios y reparaciones.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="partsUsed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Repuestos Utilizados (Opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Liste los repuestos, ej: 1x Filtro (P/N: 123-456)..."
+                      className="resize-y min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>Incluya número de parte y cantidad si es posible.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
