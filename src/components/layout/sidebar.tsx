@@ -61,10 +61,12 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <ClipboardList />
-                    Inspection
-                  </SidebarMenuButton>
+                  <Link href="/forms/inspection" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/inspection')}>
+                      <ClipboardList />
+                      Inspection
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
