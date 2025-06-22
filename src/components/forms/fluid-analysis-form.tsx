@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { CalendarDays, Loader2, FileText } from 'lucide-react';
+import { CalendarDays, Loader2, FlaskConical } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
@@ -17,45 +17,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-const workOrderFormSchema = z.object({
-  clientName: z.string().min(2, { message: 'Client name must be at least 2 characters.' }),
-  date: z.date({ required_error: 'A date is required.' }),
+const fluidAnalysisSchema = z.object({
+  sampleDate: z.date({ required_error: 'A sample date is required.' }),
+  technicianName: z.string().min(2, { message: 'Technician name is required.' }),
   equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  location: z.string().min(2, { message: "Location is required."}),
-  reportedBy: z.string().min(2, { message: "Reporter's name is required." }),
-  issueDescription: z.string().min(10, { message: 'Please describe the issue (min 10 characters).' }).max(500),
-  assignedTechnician: z.string().min(2, { message: 'Technician name must be at least 2 characters.' }),
-  status: z.enum(['pending', 'in-progress', 'completed'], { required_error: 'Please select a status.' }),
-  priority: z.enum(['low', 'medium', 'high', 'urgent'], { required_error: 'Please select a priority level.' }),
-  estimatedHours: z.coerce.number().min(0).optional(),
-  requiredParts: z.string().optional(),
+  fluidType: z.enum(['engine_oil', 'hydraulic_fluid', 'coolant', 'transmission_fluid'], { required_error: 'Please select a fluid type.' }),
+  sampleId: z.string().min(1, 'Sample ID is required.'),
+  viscosityLevel: z.coerce.number().min(0, 'Viscosity must be a positive value.'),
+  contaminationLevel: z.string().min(1, 'Contamination level is required.'),
+  analysisSummary: z.string().min(10, 'Analysis summary is required.'),
+  actionRequired: z.enum(['none', 'change_fluid', 'monitor', 'immediate_repair'], { required_error: 'Please select an action.' }),
 });
 
-type WorkOrderFormValues = z.infer<typeof workOrderFormSchema>;
+type FluidAnalysisValues = z.infer<typeof fluidAnalysisSchema>;
 
-export function WorkOrderForm() {
+export function FluidAnalysisForm() {
   const { toast } = useToast();
-  const form = useForm<WorkOrderFormValues>({
-    resolver: zodResolver(workOrderFormSchema),
+  const form = useForm<FluidAnalysisValues>({
+    resolver: zodResolver(fluidAnalysisSchema),
     defaultValues: {
-      clientName: '',
+      technicianName: '',
       equipmentId: '',
-      location: '',
-      reportedBy: '',
-      issueDescription: '',
-      assignedTechnician: '',
-      status: 'pending',
-      priority: 'medium',
-      estimatedHours: 0,
-      requiredParts: ''
+      sampleId: '',
+      viscosityLevel: 0,
+      contaminationLevel: '',
+      analysisSummary: '',
     },
   });
 
-  async function onSubmit(data: WorkOrderFormValues) {
+  async function onSubmit(data: FluidAnalysisValues) {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Work Order Submitted!',
+      title: 'Fluid Analysis Form Submitted!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -69,10 +63,10 @@ export function WorkOrderForm() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <FileText className="w-6 h-6 text-primary" />
-          <CardTitle>Work Order</CardTitle>
+          <FlaskConical className="w-6 h-6 text-primary" />
+          <CardTitle>Fluid Analysis Report</CardTitle>
         </div>
-        <CardDescription>Create a new work order for a service or repair job.</CardDescription>
+        <CardDescription>Record the results of a fluid sample analysis.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -80,12 +74,12 @@ export function WorkOrderForm() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <FormField
                 control={form.control}
-                name="clientName"
+                name="technicianName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Name</FormLabel>
+                    <FormLabel>Technician Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="ACME Corporation" {...field} />
+                      <Input placeholder="Jane Doe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -93,10 +87,10 @@ export function WorkOrderForm() {
               />
               <FormField
                 control={form.control}
-                name="date"
+                name="sampleDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Date of Sample</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -123,14 +117,14 @@ export function WorkOrderForm() {
                   </FormItem>
                 )}
               />
-              <FormField
+               <FormField
                 control={form.control}
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Equipment ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., MACK-LR-45" {...field} className="font-code" />
+                      <Input placeholder="e.g., CAT-D6" {...field} className="font-code" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,12 +132,12 @@ export function WorkOrderForm() {
               />
               <FormField
                 control={form.control}
-                name="location"
+                name="sampleId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Sample ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., South Quarry" {...field} />
+                      <Input placeholder="e.g., OIL-00123" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,69 +145,21 @@ export function WorkOrderForm() {
               />
               <FormField
                 control={form.control}
-                name="reportedBy"
+                name="fluidType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Reported By</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Site Foreman" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="assignedTechnician"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assigned Technician</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <FormLabel>Fluid Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue placeholder="Select fluid type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="engine_oil">Engine Oil</SelectItem>
+                        <SelectItem value="hydraulic_fluid">Hydraulic Fluid</SelectItem>
+                        <SelectItem value="coolant">Coolant</SelectItem>
+                        <SelectItem value="transmission_fluid">Transmission Fluid</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -222,13 +168,49 @@ export function WorkOrderForm() {
               />
                <FormField
                 control={form.control}
-                name="estimatedHours"
+                name="viscosityLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estimated Hours (Optional)</FormLabel>
+                    <FormLabel>Viscosity Level (cSt)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="8" {...field} />
+                      <Input type="number" placeholder="40" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+                <FormField
+                control={form.control}
+                name="contaminationLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contamination (ISO Code)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 18/16/13" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="actionRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Action Required</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select required action" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="monitor">Monitor</SelectItem>
+                        <SelectItem value="change_fluid">Change Fluid</SelectItem>
+                        <SelectItem value="immediate_repair">Immediate Repair Needed</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -236,36 +218,18 @@ export function WorkOrderForm() {
             </div>
             <FormField
               control={form.control}
-              name="issueDescription"
+              name="analysisSummary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Issue Description</FormLabel>
+                  <FormLabel>Analysis Summary & Recommendations</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the reported issue or required work..."
+                      placeholder="Summarize the lab findings and recommend next steps..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>Provide a clear and concise description of the problem.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="requiredParts"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Required Parts (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="List any known parts required for the job..."
-                      className="resize-y min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>e.g., Oil filter (P/N 123), Hydraulic hose (P/N 456)</FormDescription>
+                  <FormDescription>Include details on wear metals, additives, and overall fluid condition.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -277,7 +241,7 @@ export function WorkOrderForm() {
                   Submitting...
                 </>
               ) : (
-                'Submit Work Order'
+                'Submit Analysis Report'
               )}
             </Button>
           </form>

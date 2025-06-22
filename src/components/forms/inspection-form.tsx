@@ -24,7 +24,14 @@ const inspectionFormSchema = z.object({
   equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
   location: z.string().min(2, { message: 'Location must be at least 2 characters.' }),
   overallCondition: z.enum(['good', 'fair', 'poor'], { required_error: 'Please select the overall condition.' }),
+  fluidLevels: z.enum(['ok', 'low', 'na'], { required_error: 'Please select fluid levels status.' }),
+  brakeSystem: z.enum(['ok', 'adjustment_needed', 'repair_needed'], { required_error: 'Please select brake system status.' }),
+  hydraulicSystem: z.enum(['ok', 'leaking', 'repair_needed'], { required_error: 'Please select hydraulic system status.' }),
+  electricalSystem: z.enum(['ok', 'faulty', 'repair_needed'], { required_error: 'Please select electrical system status.' }),
+  tireCondition: z.string().min(2, { message: 'Please describe tire condition.'}),
+  attachmentsCondition: z.string().optional(),
   notes: z.string().min(10, { message: 'Please provide some notes (min 10 characters).' }).max(500),
+  safetyEquipment: z.boolean().default(false).optional(),
   passedInspection: z.boolean().default(false).optional(),
 });
 
@@ -39,6 +46,9 @@ export function InspectionForm() {
       equipmentId: '',
       location: '',
       notes: '',
+      tireCondition: '',
+      attachmentsCondition: '',
+      safetyEquipment: false,
       passedInspection: false,
     },
   });
@@ -71,7 +81,7 @@ export function InspectionForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <FormField
                 control={form.control}
                 name="inspectorName"
@@ -165,6 +175,120 @@ export function InspectionForm() {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="fluidLevels"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fluid Levels</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select fluid status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ok">OK</SelectItem>
+                        <SelectItem value="low">Low / Needs Refill</SelectItem>
+                        <SelectItem value="na">N/A</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="brakeSystem"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brake System</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select brake status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ok">OK</SelectItem>
+                        <SelectItem value="adjustment_needed">Needs Adjustment</SelectItem>
+                        <SelectItem value="repair_needed">Needs Repair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="hydraulicSystem"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hydraulic System</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select hydraulic status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ok">OK</SelectItem>
+                        <SelectItem value="leaking">Leaking</SelectItem>
+                        <SelectItem value="repair_needed">Needs Repair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="electricalSystem"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Electrical System</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select electrical status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ok">OK</SelectItem>
+                        <SelectItem value="faulty">Faulty Component</SelectItem>
+                        <SelectItem value="repair_needed">Needs Repair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tireCondition"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tire Condition & Pressure</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Good, 150 PSI" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="attachmentsCondition"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Attachments Condition (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Bucket has minor wear" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <FormField
               control={form.control}
@@ -184,21 +308,38 @@ export function InspectionForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="passedInspection"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
-                  <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Passed Inspection</FormLabel>
-                    <FormDescription>Confirm that the equipment has passed all inspection criteria.</FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
+            <div className="grid md:grid-cols-2 gap-8">
+              <FormField
+                control={form.control}
+                name="safetyEquipment"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Safety Equipment OK</FormLabel>
+                      <FormDescription>Fire extinguisher and first aid kit are present and in good condition.</FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="passedInspection"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Passed Inspection</FormLabel>
+                      <FormDescription>Confirm that the equipment has passed all inspection criteria.</FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
             <Button type="submit" disabled={form.formState.isSubmitting} className="w-full md:w-auto">
               {form.formState.isSubmitting ? (
                 <>

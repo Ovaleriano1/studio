@@ -15,14 +15,24 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '../ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const repairFormSchema = z.object({
   technicianName: z.string().min(2, { message: 'Technician name must be at least 2 characters.' }),
+  clientName: z.string().min(2, { message: 'Client name is required.' }),
+  workOrderNumber: z.string().optional(),
   date: z.date({ required_error: 'A date is required.' }),
   equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  problemDescription: z.string().min(10, { message: 'Please describe the problem (min 10 characters).' }).max(500),
-  partsUsed: z.string().optional(),
   laborHours: z.coerce.number().min(0, { message: 'Hours must be a positive number.' }),
+  symptoms: z.string().min(10, { message: 'Please describe the symptoms (min 10 characters).' }),
+  problemDescription: z.string().min(10, { message: 'Please describe the problem (min 10 characters).' }).max(500),
+  diagnosticSteps: z.string().min(10, { message: 'Please describe diagnostic steps (min 10 characters).' }),
+  partsUsed: z.string().optional(),
+  testingNotes: z.string().optional(),
+  finalStatus: z.enum(['repaired', 'needs_follow_up', 'awaiting_parts']),
+  repairCompleted: z.boolean().default(false),
+  followUpRequired: z.boolean().default(false),
 });
 
 type RepairFormValues = z.infer<typeof repairFormSchema>;
@@ -33,10 +43,17 @@ export function RepairForm() {
     resolver: zodResolver(repairFormSchema),
     defaultValues: {
       technicianName: '',
+      clientName: '',
+      workOrderNumber: '',
       equipmentId: '',
+      symptoms: '',
       problemDescription: '',
+      diagnosticSteps: '',
       partsUsed: '',
       laborHours: 0,
+      testingNotes: '',
+      repairCompleted: false,
+      followUpRequired: false,
     },
   });
 
@@ -66,7 +83,7 @@ export function RepairForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <FormField
                 control={form.control}
                 name="technicianName"
@@ -75,6 +92,32 @@ export function RepairForm() {
                     <FormLabel>Technician Name</FormLabel>
                     <FormControl>
                       <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="clientName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="ACME Inc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="workOrderNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Work Order # (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="WO-12345" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -141,13 +184,47 @@ export function RepairForm() {
             </div>
             <FormField
               control={form.control}
+              name="symptoms"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Symptoms Reported</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe the initial symptoms reported by the client or operator..."
+                      className="resize-y min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="diagnosticSteps"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Diagnostic Steps Taken</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="List the diagnostic procedures performed..."
+                      className="resize-y min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="problemDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Problem Description</FormLabel>
+                  <FormLabel>Work Performed / Problem Resolution</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the initial problem or symptom..."
+                      placeholder="Describe the work performed to fix the issue..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -174,6 +251,77 @@ export function RepairForm() {
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+              name="testingNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Post-Repair Testing Notes (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe the results of any testing after the repair..."
+                      className="resize-y min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid md:grid-cols-3 gap-8">
+              <FormField
+                control={form.control}
+                name="repairCompleted"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Repair Completed</FormLabel>
+                      <FormDescription>The main repair work is finished.</FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="followUpRequired"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Follow-up Required</FormLabel>
+                      <FormDescription>Further action or a return visit is needed.</FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="finalStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Final Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select final status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="repaired">Repaired & Operational</SelectItem>
+                        <SelectItem value="needs_follow_up">Needs Follow-up</SelectItem>
+                        <SelectItem value="awaiting_parts">Awaiting Parts</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <Button type="submit" disabled={form.formState.isSubmitting} className="w-full md:w-auto">
               {form.formState.isSubmitting ? (
                 <>

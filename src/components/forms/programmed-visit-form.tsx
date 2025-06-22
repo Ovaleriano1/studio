@@ -20,8 +20,11 @@ const programmedVisitSchema = z.object({
   clientName: z.string().min(2, { message: 'Client name must be at least 2 characters.' }),
   location: z.string().min(2, { message: 'Location must be at least 2 characters.' }),
   scheduledDate: z.date({ required_error: 'A scheduled date is required.' }),
-  visitPurpose: z.string().min(10, { message: 'Please describe the purpose of the visit (min 10 characters).' }),
   assignedTechnician: z.string().min(2, { message: 'Technician name is required.' }),
+  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
+  contactPerson: z.string().min(2, { message: 'Contact person is required.' }),
+  contactPhone: z.string().min(8, { message: 'A valid phone number is required.' }),
+  visitPurpose: z.string().min(10, { message: 'Please describe the purpose of the visit (min 10 characters).' }),
 });
 
 type ProgrammedVisitValues = z.infer<typeof programmedVisitSchema>;
@@ -35,6 +38,9 @@ export function ProgrammedVisitForm() {
       location: '',
       visitPurpose: '',
       assignedTechnician: '',
+      equipmentId: '',
+      contactPerson: '',
+      contactPhone: '',
     },
   });
 
@@ -131,6 +137,45 @@ export function ProgrammedVisitForm() {
                     <FormLabel>Assigned Technician</FormLabel>
                     <FormControl>
                       <Input placeholder="Jane Smith" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="equipmentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Equipment ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. MACK-GR-12" {...field} className="font-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="contactPerson"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Site Contact Person</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Bob Builder" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="contactPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Site Contact Phone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(555) 123-4567" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

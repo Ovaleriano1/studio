@@ -20,10 +20,19 @@ import { cn } from '@/lib/utils';
 const warrantyFormSchema = z.object({
   customerName: z.string().min(2, { message: 'Customer name is required.' }),
   equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
+  productModel: z.string().min(2, { message: 'Product model is required.' }),
+  serialNumber: z.string().min(2, { message: 'Serial number is required.' }),
   purchaseDate: z.date({ required_error: 'A purchase date is required.' }),
-  claimDescription: z.string().min(10, { message: 'Please describe the claim (min 10 characters).' }).max(500),
-  claimStatus: z.enum(['submitted', 'under-review', 'approved', 'denied'], { required_error: 'Please select a claim status.' }),
+  failureDate: z.date({ required_error: 'A failure date is required.' }),
+  hoursAtFailure: z.coerce.number().min(0, 'Hours must be a positive number.'),
+  dealerName: z.string().min(2, 'Dealer name is required.'),
   invoiceNumber: z.string().min(1, { message: 'Invoice number is required.' }),
+  partNumberFailed: z.string().min(1, 'Failed part number is required.'),
+  partNumberReplaced: z.string().min(1, 'Replaced part number is required.'),
+  claimType: z.enum(['part', 'labor', 'both'], { required_error: 'Please select a claim type.' }),
+  claimStatus: z.enum(['submitted', 'under-review', 'approved', 'denied'], { required_error: 'Please select a claim status.' }),
+  claimDescription: z.string().min(10, { message: 'Please describe the claim (min 10 characters).' }).max(500),
+  technicianNotes: z.string().optional(),
 });
 
 type WarrantyFormValues = z.infer<typeof warrantyFormSchema>;
@@ -35,9 +44,16 @@ export function WarrantyForm() {
     defaultValues: {
       customerName: '',
       equipmentId: '',
-      claimDescription: '',
-      claimStatus: 'submitted',
+      productModel: '',
+      serialNumber: '',
+      hoursAtFailure: 0,
+      dealerName: '',
       invoiceNumber: '',
+      partNumberFailed: '',
+      partNumberReplaced: '',
+      claimStatus: 'submitted',
+      claimDescription: '',
+      technicianNotes: '',
     },
   });
 
@@ -67,7 +83,7 @@ export function WarrantyForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <FormField
                 control={form.control}
                 name="customerName"
@@ -89,6 +105,32 @@ export function WarrantyForm() {
                     <FormLabel>Equipment / Product ID</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., CAT-D6" {...field} className="font-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="productModel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Model</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., D6T" {...field} className="font-code"/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="serialNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Serial Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 12345ABC" {...field} className="font-code"/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -128,13 +170,119 @@ export function WarrantyForm() {
               />
               <FormField
                 control={form.control}
+                name="failureDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date of Failure</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                          >
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="hoursAtFailure"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hours at Failure</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="1250" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dealerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dealer Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Reliable Machinery Co." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="invoiceNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Invoice Number</FormLabel>
+                    <FormLabel>Original Invoice Number</FormLabel>
                     <FormControl>
                       <Input placeholder="INV-2024-00123" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="partNumberFailed"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Failed Part Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="P/N: 123-ABC" {...field} className="font-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="partNumberReplaced"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Replaced Part Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="P/N: 123-ABD" {...field} className="font-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="claimType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Claim Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="part">Part Only</SelectItem>
+                        <SelectItem value="labor">Labor Only</SelectItem>
+                        <SelectItem value="both">Part and Labor</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -177,6 +325,23 @@ export function WarrantyForm() {
                     />
                   </FormControl>
                    <FormDescription>Please be as specific as possible.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="technicianNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Technician Notes (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Add any relevant notes from the technician..."
+                      className="resize-y min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

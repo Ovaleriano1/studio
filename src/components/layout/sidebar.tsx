@@ -25,6 +25,9 @@ import {
   Hammer,
   CalendarCheck,
   ShieldCheck,
+  LifeBuoy,
+  FlaskConical,
+  FileSignature
 } from 'lucide-react';
 
 export function AppSidebar() {
@@ -100,6 +103,30 @@ export function AppSidebar() {
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/warranty')}>
                       <ShieldCheck />
                       Garantía
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/forms/safety-compliance" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/safety-compliance')}>
+                      <LifeBuoy />
+                      Cumplimiento de Seguridad
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/forms/fluid-analysis" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/fluid-analysis')}>
+                      <FlaskConical />
+                      Análisis de Fluidos
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/forms/rental-agreement" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/rental-agreement')}>
+                      <FileSignature />
+                      Contrato de Alquiler
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
