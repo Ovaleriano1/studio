@@ -68,10 +68,10 @@ export function LoginForm() {
             </div>
 
             <div className="flex justify-center space-x-4">
-                <Link href="#" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><Facebook className="w-5 h-5" /></Link>
-                <Link href="#" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><Instagram className="w-5 h-5" /></Link>
-                <Link href="#" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><WhatsAppIcon /></Link>
-                <Link href="#" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><Youtube className="w-5 h-5" /></Link>
+                <Link href="https://www.facebook.com/CAMOSAHN" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><Facebook className="w-5 h-5" /></Link>
+                <Link href="https://www.instagram.com/camosahn" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><Instagram className="w-5 h-5" /></Link>
+                <Link href="https://api.whatsapp.com/send?phone=50497737276" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><WhatsAppIcon /></Link>
+                <Link href="https://www.youtube.com/CAMOSAHND" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"><Youtube className="w-5 h-5" /></Link>
             </div>
         </div>
     );
