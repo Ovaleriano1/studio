@@ -10,7 +10,7 @@ export default function FluidAnalysisPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Fluid Analysis Form" />
+        <AppHeader title="Reporte de Análisis de Fluidos" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <FluidAnalysisForm />

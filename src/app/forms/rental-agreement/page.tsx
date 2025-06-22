@@ -10,7 +10,7 @@ export default function RentalAgreementPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Rental Agreement Form" />
+        <AppHeader title="Contrato de Alquiler" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <RentalAgreementForm />

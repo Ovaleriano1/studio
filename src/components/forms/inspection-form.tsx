@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,18 +20,18 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const inspectionFormSchema = z.object({
-  inspectorName: z.string().min(2, { message: 'Inspector name must be at least 2 characters.' }),
-  date: z.date({ required_error: 'A date is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  location: z.string().min(2, { message: 'Location must be at least 2 characters.' }),
-  overallCondition: z.enum(['good', 'fair', 'poor'], { required_error: 'Please select the overall condition.' }),
-  fluidLevels: z.enum(['ok', 'low', 'na'], { required_error: 'Please select fluid levels status.' }),
-  brakeSystem: z.enum(['ok', 'adjustment_needed', 'repair_needed'], { required_error: 'Please select brake system status.' }),
-  hydraulicSystem: z.enum(['ok', 'leaking', 'repair_needed'], { required_error: 'Please select hydraulic system status.' }),
-  electricalSystem: z.enum(['ok', 'faulty', 'repair_needed'], { required_error: 'Please select electrical system status.' }),
-  tireCondition: z.string().min(2, { message: 'Please describe tire condition.'}),
+  inspectorName: z.string().min(2, { message: 'El nombre del inspector debe tener al menos 2 caracteres.' }),
+  date: z.date({ required_error: 'Se requiere una fecha.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  location: z.string().min(2, { message: 'La ubicación debe tener al menos 2 caracteres.' }),
+  overallCondition: z.enum(['good', 'fair', 'poor'], { required_error: 'Por favor seleccione la condición general.' }),
+  fluidLevels: z.enum(['ok', 'low', 'na'], { required_error: 'Por favor seleccione el estado de los niveles de fluido.' }),
+  brakeSystem: z.enum(['ok', 'adjustment_needed', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema de frenos.' }),
+  hydraulicSystem: z.enum(['ok', 'leaking', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema hidráulico.' }),
+  electricalSystem: z.enum(['ok', 'faulty', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema eléctrico.' }),
+  tireCondition: z.string().min(2, { message: 'Por favor describa la condición de los neumáticos.'}),
   attachmentsCondition: z.string().optional(),
-  notes: z.string().min(10, { message: 'Please provide some notes (min 10 characters).' }).max(500),
+  notes: z.string().min(10, { message: 'Por favor provea algunas notas (mínimo 10 caracteres).' }).max(500),
   safetyEquipment: z.boolean().default(false).optional(),
   passedInspection: z.boolean().default(false).optional(),
 });
@@ -55,11 +56,9 @@ export function InspectionForm() {
 
   async function onSubmit(data: InspectionFormValues) {
     console.log(data);
-
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
     toast({
-      title: 'Inspection Form Submitted!',
+      title: '¡Reporte de Inspección Enviado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -74,9 +73,9 @@ export function InspectionForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <ClipboardList className="w-6 h-6 text-primary" />
-          <CardTitle>Inspection Report</CardTitle>
+          <CardTitle>Reporte de Inspección</CardTitle>
         </div>
-        <CardDescription>Fill out the details for the equipment inspection.</CardDescription>
+        <CardDescription>Complete los detalles de la inspección del equipo.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -87,9 +86,9 @@ export function InspectionForm() {
                 name="inspectorName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inspector Name</FormLabel>
+                    <FormLabel>Nombre del Inspector</FormLabel>
                     <FormControl>
-                      <Input placeholder="Jane Doe" {...field} />
+                      <Input placeholder="Juan Pérez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -100,7 +99,7 @@ export function InspectionForm() {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Inspection</FormLabel>
+                    <FormLabel>Fecha de Inspección</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -108,7 +107,7 @@ export function InspectionForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -120,6 +119,7 @@ export function InspectionForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -132,7 +132,7 @@ export function InspectionForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., VOLVO-A40G" {...field} className="font-code" />
                     </FormControl>
@@ -145,9 +145,9 @@ export function InspectionForm() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Ubicación</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., West Yard" {...field} />
+                      <Input placeholder="e.g., Patio Oeste" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -158,17 +158,17 @@ export function InspectionForm() {
                 name="overallCondition"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Overall Condition</FormLabel>
+                    <FormLabel>Condición General</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select condition" />
+                          <SelectValue placeholder="Seleccione condición" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="good">Good</SelectItem>
-                        <SelectItem value="fair">Fair</SelectItem>
-                        <SelectItem value="poor">Poor</SelectItem>
+                        <SelectItem value="good">Buena</SelectItem>
+                        <SelectItem value="fair">Regular</SelectItem>
+                        <SelectItem value="poor">Mala</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -180,16 +180,16 @@ export function InspectionForm() {
                 name="fluidLevels"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fluid Levels</FormLabel>
+                    <FormLabel>Niveles de Fluido</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select fluid status" />
+                          <SelectValue placeholder="Seleccione estado de fluidos" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="low">Low / Needs Refill</SelectItem>
+                        <SelectItem value="low">Bajo / Necesita Relleno</SelectItem>
                         <SelectItem value="na">N/A</SelectItem>
                       </SelectContent>
                     </Select>
@@ -202,17 +202,17 @@ export function InspectionForm() {
                 name="brakeSystem"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brake System</FormLabel>
+                    <FormLabel>Sistema de Frenos</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select brake status" />
+                          <SelectValue placeholder="Seleccione estado de frenos" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="adjustment_needed">Needs Adjustment</SelectItem>
-                        <SelectItem value="repair_needed">Needs Repair</SelectItem>
+                        <SelectItem value="adjustment_needed">Necesita Ajuste</SelectItem>
+                        <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -224,17 +224,17 @@ export function InspectionForm() {
                 name="hydraulicSystem"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hydraulic System</FormLabel>
+                    <FormLabel>Sistema Hidráulico</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select hydraulic status" />
+                          <SelectValue placeholder="Seleccione estado hidráulico" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="leaking">Leaking</SelectItem>
-                        <SelectItem value="repair_needed">Needs Repair</SelectItem>
+                        <SelectItem value="leaking">Fugas</SelectItem>
+                        <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -246,17 +246,17 @@ export function InspectionForm() {
                 name="electricalSystem"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Electrical System</FormLabel>
+                    <FormLabel>Sistema Eléctrico</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select electrical status" />
+                          <SelectValue placeholder="Seleccione estado eléctrico" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="faulty">Faulty Component</SelectItem>
-                        <SelectItem value="repair_needed">Needs Repair</SelectItem>
+                        <SelectItem value="faulty">Componente Defectuoso</SelectItem>
+                        <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -268,9 +268,9 @@ export function InspectionForm() {
                 name="tireCondition"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tire Condition & Pressure</FormLabel>
+                    <FormLabel>Condición y Presión de Neumáticos</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Good, 150 PSI" {...field} />
+                      <Input placeholder="e.g., Buena, 150 PSI" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -281,9 +281,9 @@ export function InspectionForm() {
                 name="attachmentsCondition"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Attachments Condition (Optional)</FormLabel>
+                    <FormLabel>Condición de Accesorios (Opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Bucket has minor wear" {...field} />
+                      <Input placeholder="e.g., Cuchara con desgaste menor" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -295,15 +295,15 @@ export function InspectionForm() {
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Inspection Notes</FormLabel>
+                  <FormLabel>Notas de Inspección</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe any findings, issues, or comments..."
+                      placeholder="Describa cualquier hallazgo, problema o comentario..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>Note any wear and tear, damage, or required follow-up actions.</FormDescription>
+                  <FormDescription>Anote cualquier desgaste, daño o acciones de seguimiento requeridas.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -318,8 +318,8 @@ export function InspectionForm() {
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Safety Equipment OK</FormLabel>
-                      <FormDescription>Fire extinguisher and first aid kit are present and in good condition.</FormDescription>
+                      <FormLabel>Equipo de Seguridad OK</FormLabel>
+                      <FormDescription>El extintor de incendios y el botiquín de primeros auxilios están presentes y en buen estado.</FormDescription>
                     </div>
                   </FormItem>
                 )}
@@ -333,8 +333,8 @@ export function InspectionForm() {
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Passed Inspection</FormLabel>
-                      <FormDescription>Confirm that the equipment has passed all inspection criteria.</FormDescription>
+                      <FormLabel>Inspección Aprobada</FormLabel>
+                      <FormDescription>Confirme que el equipo ha pasado todos los criterios de inspección.</FormDescription>
                     </div>
                   </FormItem>
                 )}
@@ -344,10 +344,10 @@ export function InspectionForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Inspection Report'
+                'Enviar Reporte de Inspección'
               )}
             </Button>
           </form>

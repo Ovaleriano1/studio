@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,20 +19,20 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const warrantyFormSchema = z.object({
-  customerName: z.string().min(2, { message: 'Customer name is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  productModel: z.string().min(2, { message: 'Product model is required.' }),
-  serialNumber: z.string().min(2, { message: 'Serial number is required.' }),
-  purchaseDate: z.date({ required_error: 'A purchase date is required.' }),
-  failureDate: z.date({ required_error: 'A failure date is required.' }),
-  hoursAtFailure: z.coerce.number().min(0, 'Hours must be a positive number.'),
-  dealerName: z.string().min(2, 'Dealer name is required.'),
-  invoiceNumber: z.string().min(1, { message: 'Invoice number is required.' }),
-  partNumberFailed: z.string().min(1, 'Failed part number is required.'),
-  partNumberReplaced: z.string().min(1, 'Replaced part number is required.'),
-  claimType: z.enum(['part', 'labor', 'both'], { required_error: 'Please select a claim type.' }),
-  claimStatus: z.enum(['submitted', 'under-review', 'approved', 'denied'], { required_error: 'Please select a claim status.' }),
-  claimDescription: z.string().min(10, { message: 'Please describe the claim (min 10 characters).' }).max(500),
+  customerName: z.string().min(2, { message: 'Se requiere el nombre del cliente.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  productModel: z.string().min(2, { message: 'Se requiere el modelo del producto.' }),
+  serialNumber: z.string().min(2, { message: 'Se requiere el número de serie.' }),
+  purchaseDate: z.date({ required_error: 'Se requiere la fecha de compra.' }),
+  failureDate: z.date({ required_error: 'Se requiere la fecha de la falla.' }),
+  hoursAtFailure: z.coerce.number().min(0, 'Las horas deben ser un número positivo.'),
+  dealerName: z.string().min(2, 'Se requiere el nombre del distribuidor.'),
+  invoiceNumber: z.string().min(1, { message: 'Se requiere el número de factura.' }),
+  partNumberFailed: z.string().min(1, 'Se requiere el número de parte que falló.'),
+  partNumberReplaced: z.string().min(1, 'Se requiere el número de parte de reemplazo.'),
+  claimType: z.enum(['part', 'labor', 'both'], { required_error: 'Por favor seleccione un tipo de reclamo.' }),
+  claimStatus: z.enum(['submitted', 'under-review', 'approved', 'denied'], { required_error: 'Por favor seleccione un estado de reclamo.' }),
+  claimDescription: z.string().min(10, { message: 'Por favor describa el reclamo (mínimo 10 caracteres).' }).max(500),
   technicianNotes: z.string().optional(),
 });
 
@@ -61,7 +62,7 @@ export function WarrantyForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Warranty Claim Submitted!',
+      title: '¡Reclamo de Garantía Enviado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -76,9 +77,9 @@ export function WarrantyForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-6 h-6 text-primary" />
-          <CardTitle>Warranty Claim</CardTitle>
+          <CardTitle>Reclamo de Garantía</CardTitle>
         </div>
-        <CardDescription>File a new warranty claim for a product or piece of equipment.</CardDescription>
+        <CardDescription>Presente un nuevo reclamo de garantía para un producto o equipo.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -89,7 +90,7 @@ export function WarrantyForm() {
                 name="customerName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Customer Name</FormLabel>
+                    <FormLabel>Nombre del Cliente</FormLabel>
                     <FormControl>
                       <Input placeholder="Jane Doe" {...field} />
                     </FormControl>
@@ -102,7 +103,7 @@ export function WarrantyForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment / Product ID</FormLabel>
+                    <FormLabel>ID de Equipo / Producto</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., CAT-D6" {...field} className="font-code" />
                     </FormControl>
@@ -115,7 +116,7 @@ export function WarrantyForm() {
                 name="productModel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Model</FormLabel>
+                    <FormLabel>Modelo del Producto</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., D6T" {...field} className="font-code"/>
                     </FormControl>
@@ -128,7 +129,7 @@ export function WarrantyForm() {
                 name="serialNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Serial Number</FormLabel>
+                    <FormLabel>Número de Serie</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., 12345ABC" {...field} className="font-code"/>
                     </FormControl>
@@ -141,7 +142,7 @@ export function WarrantyForm() {
                 name="purchaseDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Purchase</FormLabel>
+                    <FormLabel>Fecha de Compra</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -149,7 +150,7 @@ export function WarrantyForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -161,6 +162,7 @@ export function WarrantyForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -173,7 +175,7 @@ export function WarrantyForm() {
                 name="failureDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Failure</FormLabel>
+                    <FormLabel>Fecha de Falla</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -181,7 +183,7 @@ export function WarrantyForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -193,6 +195,7 @@ export function WarrantyForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -205,7 +208,7 @@ export function WarrantyForm() {
                 name="hoursAtFailure"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hours at Failure</FormLabel>
+                    <FormLabel>Horas en Falla</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="1250" {...field} />
                     </FormControl>
@@ -218,9 +221,9 @@ export function WarrantyForm() {
                 name="dealerName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dealer Name</FormLabel>
+                    <FormLabel>Nombre del Distribuidor</FormLabel>
                     <FormControl>
-                      <Input placeholder="Reliable Machinery Co." {...field} />
+                      <Input placeholder="Maquinaria Confiable Co." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -231,7 +234,7 @@ export function WarrantyForm() {
                 name="invoiceNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Original Invoice Number</FormLabel>
+                    <FormLabel>Número de Factura Original</FormLabel>
                     <FormControl>
                       <Input placeholder="INV-2024-00123" {...field} />
                     </FormControl>
@@ -244,7 +247,7 @@ export function WarrantyForm() {
                 name="partNumberFailed"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Failed Part Number</FormLabel>
+                    <FormLabel>Número de Parte Fallada</FormLabel>
                     <FormControl>
                       <Input placeholder="P/N: 123-ABC" {...field} className="font-code" />
                     </FormControl>
@@ -257,7 +260,7 @@ export function WarrantyForm() {
                 name="partNumberReplaced"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Replaced Part Number</FormLabel>
+                    <FormLabel>Número de Parte Reemplazada</FormLabel>
                     <FormControl>
                       <Input placeholder="P/N: 123-ABD" {...field} className="font-code" />
                     </FormControl>
@@ -270,17 +273,17 @@ export function WarrantyForm() {
                 name="claimType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Claim Type</FormLabel>
+                    <FormLabel>Tipo de Reclamo</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder="Seleccione tipo" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="part">Part Only</SelectItem>
-                        <SelectItem value="labor">Labor Only</SelectItem>
-                        <SelectItem value="both">Part and Labor</SelectItem>
+                        <SelectItem value="part">Solo Parte</SelectItem>
+                        <SelectItem value="labor">Solo Mano de Obra</SelectItem>
+                        <SelectItem value="both">Parte y Mano de Obra</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -292,18 +295,18 @@ export function WarrantyForm() {
                 name="claimStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Claim Status</FormLabel>
+                    <FormLabel>Estado del Reclamo</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Seleccione estado" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="submitted">Submitted</SelectItem>
-                        <SelectItem value="under-review">Under Review</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="denied">Denied</SelectItem>
+                        <SelectItem value="submitted">Enviado</SelectItem>
+                        <SelectItem value="under-review">En Revisión</SelectItem>
+                        <SelectItem value="approved">Aprobado</SelectItem>
+                        <SelectItem value="denied">Rechazado</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -316,15 +319,15 @@ export function WarrantyForm() {
               name="claimDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Claim Description</FormLabel>
+                  <FormLabel>Descripción del Reclamo</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the reason for the warranty claim in detail..."
+                      placeholder="Describa el motivo del reclamo de garantía en detalle..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                   <FormDescription>Please be as specific as possible.</FormDescription>
+                   <FormDescription>Por favor, sea lo más específico posible.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -334,10 +337,10 @@ export function WarrantyForm() {
               name="technicianNotes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Technician Notes (Optional)</FormLabel>
+                  <FormLabel>Notas del Técnico (Opcional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Add any relevant notes from the technician..."
+                      placeholder="Agregue cualquier nota relevante del técnico..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -350,10 +353,10 @@ export function WarrantyForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Warranty Claim'
+                'Enviar Reclamo de Garantía'
               )}
             </Button>
           </form>

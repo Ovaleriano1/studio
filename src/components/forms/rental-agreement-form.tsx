@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, FileSignature } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,19 +19,19 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const rentalAgreementSchema = z.object({
-  customerName: z.string().min(2, 'Customer name is required.'),
-  equipmentId: z.string().min(1, 'Equipment ID is required.'),
-  rentalStartDate: z.date({ required_error: 'Rental start date is required.' }),
-  rentalEndDate: z.date({ required_error: 'Rental end date is required.' }),
-  dailyRate: z.coerce.number().min(0, 'Daily rate must be a positive number.'),
-  insuranceProvider: z.string().min(2, 'Insurance provider is required.'),
-  deliveryAddress: z.string().min(10, 'Delivery address is required.'),
-  operatorName: z.string().min(2, 'Operator name is required.'),
+  customerName: z.string().min(2, 'Se requiere el nombre del cliente.'),
+  equipmentId: z.string().min(1, 'Se requiere el ID del equipo.'),
+  rentalStartDate: z.date({ required_error: 'Se requiere la fecha de inicio del alquiler.' }),
+  rentalEndDate: z.date({ required_error: 'Se requiere la fecha de fin del alquiler.' }),
+  dailyRate: z.coerce.number().min(0, 'La tarifa diaria debe ser un número positivo.'),
+  insuranceProvider: z.string().min(2, 'Se requiere el proveedor de seguros.'),
+  deliveryAddress: z.string().min(10, 'Se requiere la dirección de entrega.'),
+  operatorName: z.string().min(2, 'Se requiere el nombre del operador.'),
   termsAccepted: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the terms and conditions.',
+    message: 'Debe aceptar los términos y condiciones.',
   }),
 }).refine(data => data.rentalEndDate > data.rentalStartDate, {
-    message: "End date must be after start date.",
+    message: "La fecha de fin debe ser posterior a la fecha de inicio.",
     path: ["rentalEndDate"],
 });
 
@@ -55,7 +56,7 @@ export function RentalAgreementForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Rental Agreement Created!',
+      title: '¡Contrato de Alquiler Creado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -70,9 +71,9 @@ export function RentalAgreementForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <FileSignature className="w-6 h-6 text-primary" />
-          <CardTitle>Rental Agreement</CardTitle>
+          <CardTitle>Contrato de Alquiler</CardTitle>
         </div>
-        <CardDescription>Create a new rental agreement for equipment.</CardDescription>
+        <CardDescription>Cree un nuevo contrato de alquiler para un equipo.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -83,7 +84,7 @@ export function RentalAgreementForm() {
                 name="customerName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Customer Name</FormLabel>
+                    <FormLabel>Nombre del Cliente</FormLabel>
                     <FormControl>
                       <Input placeholder="ACME Construction" {...field} />
                     </FormControl>
@@ -96,9 +97,9 @@ export function RentalAgreementForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., EXCAVATOR-01" {...field} className="font-code" />
+                      <Input placeholder="e.g., EXCAVADORA-01" {...field} className="font-code" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -109,7 +110,7 @@ export function RentalAgreementForm() {
                 name="rentalStartDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Rental Start Date</FormLabel>
+                    <FormLabel>Fecha de Inicio de Alquiler</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -117,7 +118,7 @@ export function RentalAgreementForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -129,6 +130,7 @@ export function RentalAgreementForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -141,7 +143,7 @@ export function RentalAgreementForm() {
                 name="rentalEndDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Rental End Date</FormLabel>
+                    <FormLabel>Fecha de Fin de Alquiler</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -149,7 +151,7 @@ export function RentalAgreementForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -161,6 +163,7 @@ export function RentalAgreementForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date < (form.getValues("rentalStartDate") || new Date())}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -173,7 +176,7 @@ export function RentalAgreementForm() {
                 name="dailyRate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Daily Rate ($)</FormLabel>
+                    <FormLabel>Tarifa Diaria ($)</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="500" {...field} />
                     </FormControl>
@@ -186,9 +189,9 @@ export function RentalAgreementForm() {
                 name="insuranceProvider"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Insurance Provider</FormLabel>
+                    <FormLabel>Proveedor de Seguros</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., InsureCo" {...field} />
+                      <Input placeholder="e.g., Aseguradora S.A." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -199,7 +202,7 @@ export function RentalAgreementForm() {
                 name="operatorName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Designated Operator Name</FormLabel>
+                    <FormLabel>Nombre del Operador Designado</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Bill Operator" {...field} />
                     </FormControl>
@@ -213,10 +216,10 @@ export function RentalAgreementForm() {
               name="deliveryAddress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Delivery Address</FormLabel>
+                  <FormLabel>Dirección de Entrega</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter the full delivery address for the equipment..."
+                      placeholder="Ingrese la dirección de entrega completa para el equipo..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -234,8 +237,8 @@ export function RentalAgreementForm() {
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Accept Terms & Conditions</FormLabel>
-                    <FormDescription>The customer agrees to the rental terms and conditions.</FormDescription>
+                    <FormLabel>Aceptar Términos y Condiciones</FormLabel>
+                    <FormDescription>El cliente acepta los términos y condiciones del alquiler.</FormDescription>
                     <FormMessage />
                   </div>
                 </FormItem>
@@ -245,10 +248,10 @@ export function RentalAgreementForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Agreement...
+                  Creando Contrato...
                 </>
               ) : (
-                'Create Rental Agreement'
+                'Crear Contrato de Alquiler'
               )}
             </Button>
           </form>

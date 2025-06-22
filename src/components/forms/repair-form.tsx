@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, Hammer } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,15 +20,15 @@ import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const repairFormSchema = z.object({
-  technicianName: z.string().min(2, { message: 'Technician name must be at least 2 characters.' }),
-  clientName: z.string().min(2, { message: 'Client name is required.' }),
+  technicianName: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
+  clientName: z.string().min(2, { message: 'Se requiere el nombre del cliente.' }),
   workOrderNumber: z.string().optional(),
-  date: z.date({ required_error: 'A date is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  laborHours: z.coerce.number().min(0, { message: 'Hours must be a positive number.' }),
-  symptoms: z.string().min(10, { message: 'Please describe the symptoms (min 10 characters).' }),
-  problemDescription: z.string().min(10, { message: 'Please describe the problem (min 10 characters).' }).max(500),
-  diagnosticSteps: z.string().min(10, { message: 'Please describe diagnostic steps (min 10 characters).' }),
+  date: z.date({ required_error: 'Se requiere una fecha.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  laborHours: z.coerce.number().min(0, { message: 'Las horas deben ser un número positivo.' }),
+  symptoms: z.string().min(10, { message: 'Por favor describa los síntomas (mínimo 10 caracteres).' }),
+  problemDescription: z.string().min(10, { message: 'Por favor describa el problema (mínimo 10 caracteres).' }).max(500),
+  diagnosticSteps: z.string().min(10, { message: 'Por favor describa los pasos de diagnóstico (mínimo 10 caracteres).' }),
   partsUsed: z.string().optional(),
   testingNotes: z.string().optional(),
   finalStatus: z.enum(['repaired', 'needs_follow_up', 'awaiting_parts']),
@@ -61,7 +62,7 @@ export function RepairForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Repair Form Submitted!',
+      title: '¡Formulario de Reparación Enviado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -76,9 +77,9 @@ export function RepairForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Hammer className="w-6 h-6 text-primary" />
-          <CardTitle>Repair Visit</CardTitle>
+          <CardTitle>Visita de Reparación</CardTitle>
         </div>
-        <CardDescription>Document the details of a repair visit.</CardDescription>
+        <CardDescription>Documente los detalles de una visita de reparación.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -89,9 +90,9 @@ export function RepairForm() {
                 name="technicianName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technician Name</FormLabel>
+                    <FormLabel>Nombre del Técnico</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="Juan Pérez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -102,7 +103,7 @@ export function RepairForm() {
                 name="clientName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Name</FormLabel>
+                    <FormLabel>Nombre del Cliente</FormLabel>
                     <FormControl>
                       <Input placeholder="ACME Inc." {...field} />
                     </FormControl>
@@ -115,9 +116,9 @@ export function RepairForm() {
                 name="workOrderNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Work Order # (Optional)</FormLabel>
+                    <FormLabel>Nº de Orden de Trabajo (Opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="WO-12345" {...field} />
+                      <Input placeholder="OT-12345" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -128,7 +129,7 @@ export function RepairForm() {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Repair</FormLabel>
+                    <FormLabel>Fecha de Reparación</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -136,7 +137,7 @@ export function RepairForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -148,6 +149,7 @@ export function RepairForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -160,7 +162,7 @@ export function RepairForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., JOHN DEERE-8R" {...field} className="font-code" />
                     </FormControl>
@@ -173,7 +175,7 @@ export function RepairForm() {
                 name="laborHours"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Labor Hours</FormLabel>
+                    <FormLabel>Horas de Trabajo</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="4.5" {...field} />
                     </FormControl>
@@ -187,10 +189,10 @@ export function RepairForm() {
               name="symptoms"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Symptoms Reported</FormLabel>
+                  <FormLabel>Síntomas Reportados</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the initial symptoms reported by the client or operator..."
+                      placeholder="Describa los síntomas iniciales reportados por el cliente u operador..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -204,10 +206,10 @@ export function RepairForm() {
               name="diagnosticSteps"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Diagnostic Steps Taken</FormLabel>
+                  <FormLabel>Pasos de Diagnóstico Realizados</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="List the diagnostic procedures performed..."
+                      placeholder="Liste los procedimientos de diagnóstico realizados..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -221,10 +223,10 @@ export function RepairForm() {
               name="problemDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Work Performed / Problem Resolution</FormLabel>
+                  <FormLabel>Trabajo Realizado / Resolución del Problema</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the work performed to fix the issue..."
+                      placeholder="Describa el trabajo realizado para solucionar el problema..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -238,15 +240,15 @@ export function RepairForm() {
               name="partsUsed"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Parts Used</FormLabel>
+                  <FormLabel>Repuestos Utilizados</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="List all parts used, including part numbers and quantities..."
+                      placeholder="Liste todos los repuestos utilizados, incluyendo números de parte y cantidades..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                   <FormDescription>e.g., 1x Filter (P/N: 123-456), 2x Bolt (P/N: 789-012)</FormDescription>
+                   <FormDescription>Ej: 1x Filtro (P/N: 123-456), 2x Perno (P/N: 789-012)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -256,10 +258,10 @@ export function RepairForm() {
               name="testingNotes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Post-Repair Testing Notes (Optional)</FormLabel>
+                  <FormLabel>Notas de Pruebas Post-Reparación (Opcional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the results of any testing after the repair..."
+                      placeholder="Describa los resultados de cualquier prueba después de la reparación..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -278,8 +280,8 @@ export function RepairForm() {
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Repair Completed</FormLabel>
-                      <FormDescription>The main repair work is finished.</FormDescription>
+                      <FormLabel>Reparación Completada</FormLabel>
+                      <FormDescription>El trabajo principal de reparación ha finalizado.</FormDescription>
                     </div>
                   </FormItem>
                 )}
@@ -293,8 +295,8 @@ export function RepairForm() {
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Follow-up Required</FormLabel>
-                      <FormDescription>Further action or a return visit is needed.</FormDescription>
+                      <FormLabel>Requiere Seguimiento</FormLabel>
+                      <FormDescription>Se necesita una acción adicional o una visita de regreso.</FormDescription>
                     </div>
                   </FormItem>
                 )}
@@ -304,17 +306,17 @@ export function RepairForm() {
                 name="finalStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Final Status</FormLabel>
+                    <FormLabel>Estado Final</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select final status" />
+                          <SelectValue placeholder="Seleccione el estado final" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="repaired">Repaired & Operational</SelectItem>
-                        <SelectItem value="needs_follow_up">Needs Follow-up</SelectItem>
-                        <SelectItem value="awaiting_parts">Awaiting Parts</SelectItem>
+                        <SelectItem value="repaired">Reparado y Operacional</SelectItem>
+                        <SelectItem value="needs_follow_up">Necesita Seguimiento</SelectItem>
+                        <SelectItem value="awaiting_parts">Esperando Repuestos</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -326,10 +328,10 @@ export function RepairForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Repair Form'
+                'Enviar Formulario de Reparación'
               )}
             </Button>
           </form>

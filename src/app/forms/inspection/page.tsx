@@ -10,7 +10,7 @@ export default function InspectionPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Inspection Form" />
+        <AppHeader title="Reporte de Inspección" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <InspectionForm />

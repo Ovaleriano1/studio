@@ -10,7 +10,7 @@ export default function WarrantyPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Warranty Claim" />
+        <AppHeader title="Reclamo de Garantía" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <WarrantyForm />

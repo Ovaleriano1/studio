@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, CalendarCheck } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,14 +18,14 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const programmedVisitSchema = z.object({
-  clientName: z.string().min(2, { message: 'Client name must be at least 2 characters.' }),
-  location: z.string().min(2, { message: 'Location must be at least 2 characters.' }),
-  scheduledDate: z.date({ required_error: 'A scheduled date is required.' }),
-  assignedTechnician: z.string().min(2, { message: 'Technician name is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  contactPerson: z.string().min(2, { message: 'Contact person is required.' }),
-  contactPhone: z.string().min(8, { message: 'A valid phone number is required.' }),
-  visitPurpose: z.string().min(10, { message: 'Please describe the purpose of the visit (min 10 characters).' }),
+  clientName: z.string().min(2, { message: 'El nombre del cliente debe tener al menos 2 caracteres.' }),
+  location: z.string().min(2, { message: 'La ubicación debe tener al menos 2 caracteres.' }),
+  scheduledDate: z.date({ required_error: 'Se requiere una fecha programada.' }),
+  assignedTechnician: z.string().min(2, { message: 'Se requiere el nombre del técnico.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  contactPerson: z.string().min(2, { message: 'Se requiere la persona de contacto.' }),
+  contactPhone: z.string().min(8, { message: 'Se requiere un número de teléfono válido.' }),
+  visitPurpose: z.string().min(10, { message: 'Por favor describa el propósito de la visita (mínimo 10 caracteres).' }),
 });
 
 type ProgrammedVisitValues = z.infer<typeof programmedVisitSchema>;
@@ -48,7 +49,7 @@ export function ProgrammedVisitForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Programmed Visit Scheduled!',
+      title: '¡Visita Programada!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -63,9 +64,9 @@ export function ProgrammedVisitForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <CalendarCheck className="w-6 h-6 text-primary" />
-          <CardTitle>Programmed Visit</CardTitle>
+          <CardTitle>Visita Programada</CardTitle>
         </div>
-        <CardDescription>Schedule a new programmed visit for a client.</CardDescription>
+        <CardDescription>Programe una nueva visita para un cliente.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -76,7 +77,7 @@ export function ProgrammedVisitForm() {
                 name="clientName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Name</FormLabel>
+                    <FormLabel>Nombre del Cliente</FormLabel>
                     <FormControl>
                       <Input placeholder="ACME Corporation" {...field} />
                     </FormControl>
@@ -89,9 +90,9 @@ export function ProgrammedVisitForm() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location / Site</FormLabel>
+                    <FormLabel>Ubicación / Sitio</FormLabel>
                     <FormControl>
-                      <Input placeholder="Main Facility" {...field} />
+                      <Input placeholder="Instalación Principal" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -102,7 +103,7 @@ export function ProgrammedVisitForm() {
                 name="scheduledDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Scheduled Date</FormLabel>
+                    <FormLabel>Fecha Programada</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -110,7 +111,7 @@ export function ProgrammedVisitForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -122,6 +123,7 @@ export function ProgrammedVisitForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -134,7 +136,7 @@ export function ProgrammedVisitForm() {
                 name="assignedTechnician"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assigned Technician</FormLabel>
+                    <FormLabel>Técnico Asignado</FormLabel>
                     <FormControl>
                       <Input placeholder="Jane Smith" {...field} />
                     </FormControl>
@@ -147,7 +149,7 @@ export function ProgrammedVisitForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. MACK-GR-12" {...field} className="font-code" />
                     </FormControl>
@@ -160,7 +162,7 @@ export function ProgrammedVisitForm() {
                 name="contactPerson"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Site Contact Person</FormLabel>
+                    <FormLabel>Persona de Contacto en Sitio</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. Bob Builder" {...field} />
                     </FormControl>
@@ -173,7 +175,7 @@ export function ProgrammedVisitForm() {
                 name="contactPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Site Contact Phone</FormLabel>
+                    <FormLabel>Teléfono de Contacto en Sitio</FormLabel>
                     <FormControl>
                       <Input placeholder="(555) 123-4567" {...field} />
                     </FormControl>
@@ -187,10 +189,10 @@ export function ProgrammedVisitForm() {
               name="visitPurpose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Purpose of Visit</FormLabel>
+                  <FormLabel>Propósito de la Visita</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="e.g., Quarterly preventive maintenance check, Follow-up on recent repair..."
+                      placeholder="e.g., Mantenimiento preventivo trimestral, Seguimiento de reparación reciente..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -203,10 +205,10 @@ export function ProgrammedVisitForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Scheduling...
+                  Programando...
                 </>
               ) : (
-                'Schedule Visit'
+                'Programar Visita'
               )}
             </Button>
           </form>

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, LifeBuoy } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,15 +20,15 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const safetyFormSchema = z.object({
-  reportDate: z.date({ required_error: 'A date is required.' }),
-  inspectorName: z.string().min(2, { message: 'Inspector name must be at least 2 characters.' }),
-  siteLocation: z.string().min(2, { message: 'Site location is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
+  reportDate: z.date({ required_error: 'Se requiere una fecha.' }),
+  inspectorName: z.string().min(2, { message: 'Se requiere el nombre del inspector.' }),
+  siteLocation: z.string().min(2, { message: 'Se requiere la ubicación del sitio.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
   fireExtinguisherCheck: z.boolean().default(false),
   firstAidKitCheck: z.boolean().default(false),
   emergencyStopCheck: z.boolean().default(false),
-  ppeComplianceNotes: z.string().min(10, 'Please provide notes on PPE compliance.'),
-  overallSafetyRating: z.enum(['excellent', 'good', 'needs_improvement', 'unsafe'], { required_error: 'Please select a safety rating.' }),
+  ppeComplianceNotes: z.string().min(10, 'Por favor, proporcione notas sobre el cumplimiento de EPP.'),
+  overallSafetyRating: z.enum(['excellent', 'good', 'needs_improvement', 'unsafe'], { required_error: 'Por favor, seleccione una calificación de seguridad.' }),
 });
 
 type SafetyFormValues = z.infer<typeof safetyFormSchema>;
@@ -51,7 +52,7 @@ export function SafetyComplianceForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Safety Form Submitted!',
+      title: '¡Reporte de Seguridad Enviado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -66,9 +67,9 @@ export function SafetyComplianceForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <LifeBuoy className="w-6 h-6 text-primary" />
-          <CardTitle>Safety Compliance Report</CardTitle>
+          <CardTitle>Reporte de Cumplimiento de Seguridad</CardTitle>
         </div>
-        <CardDescription>Document the safety compliance check for a site or equipment.</CardDescription>
+        <CardDescription>Documente la verificación de cumplimiento de seguridad para un sitio o equipo.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -79,9 +80,9 @@ export function SafetyComplianceForm() {
                 name="inspectorName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inspector Name</FormLabel>
+                    <FormLabel>Nombre del Inspector</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="Juan Pérez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -92,7 +93,7 @@ export function SafetyComplianceForm() {
                 name="reportDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Report</FormLabel>
+                    <FormLabel>Fecha del Reporte</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -100,7 +101,7 @@ export function SafetyComplianceForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -112,6 +113,7 @@ export function SafetyComplianceForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -124,9 +126,9 @@ export function SafetyComplianceForm() {
                 name="siteLocation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Site/Location</FormLabel>
+                    <FormLabel>Sitio/Ubicación</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., North Quarry" {...field} />
+                      <Input placeholder="e.g., Cantera Norte" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -137,7 +139,7 @@ export function SafetyComplianceForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID (if applicable)</FormLabel>
+                    <FormLabel>ID del Equipo (si aplica)</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., VOLVO-A40G" {...field} className="font-code" />
                     </FormControl>
@@ -148,15 +150,15 @@ export function SafetyComplianceForm() {
             </div>
 
             <div className="space-y-4">
-                <h3 className="text-lg font-medium">Checklist</h3>
+                <h3 className="text-lg font-medium">Lista de Verificación</h3>
                 <FormField
                 control={form.control}
                 name="fireExtinguisherCheck"
                 render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">Fire Extinguisher</FormLabel>
-                        <FormDescription>Is the fire extinguisher present, charged, and accessible?</FormDescription>
+                        <FormLabel className="text-base">Extintor de Incendios</FormLabel>
+                        <FormDescription>¿El extintor está presente, cargado y accesible?</FormDescription>
                     </div>
                     <FormControl>
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
@@ -170,8 +172,8 @@ export function SafetyComplianceForm() {
                 render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">First-Aid Kit</FormLabel>
-                        <FormDescription>Is the first-aid kit stocked and accessible?</FormDescription>
+                        <FormLabel className="text-base">Botiquín de Primeros Auxilios</FormLabel>
+                        <FormDescription>¿El botiquín está abastecido y accesible?</FormDescription>
                     </div>
                     <FormControl>
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
@@ -185,8 +187,8 @@ export function SafetyComplianceForm() {
                 render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">Emergency Stop</FormLabel>
-                        <FormDescription>Are emergency stop buttons functional and unobstructed?</FormDescription>
+                        <FormLabel className="text-base">Parada de Emergencia</FormLabel>
+                        <FormDescription>¿Los botones de parada de emergencia son funcionales y no están obstruidos?</FormDescription>
                     </div>
                     <FormControl>
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
@@ -201,10 +203,10 @@ export function SafetyComplianceForm() {
               name="ppeComplianceNotes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>PPE Compliance Notes</FormLabel>
+                  <FormLabel>Notas de Cumplimiento de EPP</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Comment on the use of Personal Protective Equipment (helmets, vests, etc.)..."
+                      placeholder="Comente sobre el uso de Equipo de Protección Personal (cascos, chalecos, etc.)..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
@@ -219,18 +221,18 @@ export function SafetyComplianceForm() {
                 name="overallSafetyRating"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Overall Safety Rating</FormLabel>
+                    <FormLabel>Calificación General de Seguridad</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a rating" />
+                          <SelectValue placeholder="Seleccione una calificación" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="excellent">Excellent</SelectItem>
-                        <SelectItem value="good">Good</SelectItem>
-                        <SelectItem value="needs_improvement">Needs Improvement</SelectItem>
-                        <SelectItem value="unsafe">Unsafe</SelectItem>
+                        <SelectItem value="excellent">Excelente</SelectItem>
+                        <SelectItem value="good">Buena</SelectItem>
+                        <SelectItem value="needs_improvement">Necesita Mejora</SelectItem>
+                        <SelectItem value="unsafe">Inseguro</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -242,10 +244,10 @@ export function SafetyComplianceForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Safety Report'
+                'Enviar Reporte de Seguridad'
               )}
             </Button>
           </form>

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,15 +19,15 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const workOrderFormSchema = z.object({
-  clientName: z.string().min(2, { message: 'Client name must be at least 2 characters.' }),
-  date: z.date({ required_error: 'A date is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  location: z.string().min(2, { message: "Location is required."}),
-  reportedBy: z.string().min(2, { message: "Reporter's name is required." }),
-  issueDescription: z.string().min(10, { message: 'Please describe the issue (min 10 characters).' }).max(500),
-  assignedTechnician: z.string().min(2, { message: 'Technician name must be at least 2 characters.' }),
-  status: z.enum(['pending', 'in-progress', 'completed'], { required_error: 'Please select a status.' }),
-  priority: z.enum(['low', 'medium', 'high', 'urgent'], { required_error: 'Please select a priority level.' }),
+  clientName: z.string().min(2, { message: 'El nombre del cliente debe tener al menos 2 caracteres.' }),
+  date: z.date({ required_error: 'Se requiere una fecha.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  location: z.string().min(2, { message: "Se requiere la ubicación."}),
+  reportedBy: z.string().min(2, { message: "Se requiere el nombre de quien reporta." }),
+  issueDescription: z.string().min(10, { message: 'Por favor describa el problema (mínimo 10 caracteres).' }).max(500),
+  assignedTechnician: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
+  status: z.enum(['pending', 'in-progress', 'completed'], { required_error: 'Por favor seleccione un estado.' }),
+  priority: z.enum(['low', 'medium', 'high', 'urgent'], { required_error: 'Por favor seleccione un nivel de prioridad.' }),
   estimatedHours: z.coerce.number().min(0).optional(),
   requiredParts: z.string().optional(),
 });
@@ -55,7 +56,7 @@ export function WorkOrderForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Work Order Submitted!',
+      title: '¡Orden de Trabajo Enviada!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -70,9 +71,9 @@ export function WorkOrderForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <FileText className="w-6 h-6 text-primary" />
-          <CardTitle>Work Order</CardTitle>
+          <CardTitle>Orden de Trabajo</CardTitle>
         </div>
-        <CardDescription>Create a new work order for a service or repair job.</CardDescription>
+        <CardDescription>Cree una nueva orden de trabajo para un servicio o reparación.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -83,7 +84,7 @@ export function WorkOrderForm() {
                 name="clientName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Name</FormLabel>
+                    <FormLabel>Nombre del Cliente</FormLabel>
                     <FormControl>
                       <Input placeholder="ACME Corporation" {...field} />
                     </FormControl>
@@ -96,7 +97,7 @@ export function WorkOrderForm() {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Fecha</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -104,7 +105,7 @@ export function WorkOrderForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -116,6 +117,7 @@ export function WorkOrderForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -128,7 +130,7 @@ export function WorkOrderForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., MACK-LR-45" {...field} className="font-code" />
                     </FormControl>
@@ -141,9 +143,9 @@ export function WorkOrderForm() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Ubicación</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., South Quarry" {...field} />
+                      <Input placeholder="e.g., Cantera Sur" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,9 +156,9 @@ export function WorkOrderForm() {
                 name="reportedBy"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Reported By</FormLabel>
+                    <FormLabel>Reportado Por</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Site Foreman" {...field} />
+                      <Input placeholder="e.g., Jefe de Sitio" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,9 +169,9 @@ export function WorkOrderForm() {
                 name="assignedTechnician"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assigned Technician</FormLabel>
+                    <FormLabel>Técnico Asignado</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="Juan Pérez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -180,18 +182,18 @@ export function WorkOrderForm() {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <FormLabel>Prioridad</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue placeholder="Seleccione prioridad" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="low">Baja</SelectItem>
+                        <SelectItem value="medium">Media</SelectItem>
+                        <SelectItem value="high">Alta</SelectItem>
+                        <SelectItem value="urgent">Urgente</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -203,17 +205,17 @@ export function WorkOrderForm() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>Estado</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Seleccione estado" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="pending">Pendiente</SelectItem>
+                        <SelectItem value="in-progress">En Progreso</SelectItem>
+                        <SelectItem value="completed">Completada</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -225,7 +227,7 @@ export function WorkOrderForm() {
                 name="estimatedHours"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estimated Hours (Optional)</FormLabel>
+                    <FormLabel>Horas Estimadas (Opcional)</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="8" {...field} />
                     </FormControl>
@@ -239,15 +241,15 @@ export function WorkOrderForm() {
               name="issueDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Issue Description</FormLabel>
+                  <FormLabel>Descripción del Problema</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the reported issue or required work..."
+                      placeholder="Describa el problema reportado o el trabajo requerido..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>Provide a clear and concise description of the problem.</FormDescription>
+                  <FormDescription>Proporcione una descripción clara y concisa del problema.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -257,15 +259,15 @@ export function WorkOrderForm() {
               name="requiredParts"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Required Parts (Optional)</FormLabel>
+                  <FormLabel>Repuestos Requeridos (Opcional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="List any known parts required for the job..."
+                      placeholder="Liste cualquier repuesto conocido requerido para el trabajo..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>e.g., Oil filter (P/N 123), Hydraulic hose (P/N 456)</FormDescription>
+                  <FormDescription>Ej: Filtro de aceite (P/N 123), Manguera hidráulica (P/N 456)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -274,10 +276,10 @@ export function WorkOrderForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Work Order'
+                'Enviar Orden de Trabajo'
               )}
             </Button>
           </form>

@@ -10,7 +10,7 @@ export default function WorkOrderPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Work Order" />
+        <AppHeader title="Orden de Trabajo" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <WorkOrderForm />

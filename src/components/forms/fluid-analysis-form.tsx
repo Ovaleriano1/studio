@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, FlaskConical } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,15 +19,15 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const fluidAnalysisSchema = z.object({
-  sampleDate: z.date({ required_error: 'A sample date is required.' }),
-  technicianName: z.string().min(2, { message: 'Technician name is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  fluidType: z.enum(['engine_oil', 'hydraulic_fluid', 'coolant', 'transmission_fluid'], { required_error: 'Please select a fluid type.' }),
-  sampleId: z.string().min(1, 'Sample ID is required.'),
-  viscosityLevel: z.coerce.number().min(0, 'Viscosity must be a positive value.'),
-  contaminationLevel: z.string().min(1, 'Contamination level is required.'),
-  analysisSummary: z.string().min(10, 'Analysis summary is required.'),
-  actionRequired: z.enum(['none', 'change_fluid', 'monitor', 'immediate_repair'], { required_error: 'Please select an action.' }),
+  sampleDate: z.date({ required_error: 'Se requiere una fecha de muestra.' }),
+  technicianName: z.string().min(2, { message: 'Se requiere el nombre del técnico.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  fluidType: z.enum(['engine_oil', 'hydraulic_fluid', 'coolant', 'transmission_fluid'], { required_error: 'Por favor seleccione un tipo de fluido.' }),
+  sampleId: z.string().min(1, 'Se requiere el ID de la muestra.'),
+  viscosityLevel: z.coerce.number().min(0, 'La viscosidad debe ser un valor positivo.'),
+  contaminationLevel: z.string().min(1, 'Se requiere el nivel de contaminación.'),
+  analysisSummary: z.string().min(10, 'Se requiere un resumen del análisis.'),
+  actionRequired: z.enum(['none', 'change_fluid', 'monitor', 'immediate_repair'], { required_error: 'Por favor seleccione una acción.' }),
 });
 
 type FluidAnalysisValues = z.infer<typeof fluidAnalysisSchema>;
@@ -49,7 +50,7 @@ export function FluidAnalysisForm() {
     console.log(data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast({
-      title: 'Fluid Analysis Form Submitted!',
+      title: '¡Reporte de Análisis de Fluidos Enviado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -64,9 +65,9 @@ export function FluidAnalysisForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <FlaskConical className="w-6 h-6 text-primary" />
-          <CardTitle>Fluid Analysis Report</CardTitle>
+          <CardTitle>Reporte de Análisis de Fluidos</CardTitle>
         </div>
-        <CardDescription>Record the results of a fluid sample analysis.</CardDescription>
+        <CardDescription>Registre los resultados del análisis de una muestra de fluido.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -77,9 +78,9 @@ export function FluidAnalysisForm() {
                 name="technicianName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technician Name</FormLabel>
+                    <FormLabel>Nombre del Técnico</FormLabel>
                     <FormControl>
-                      <Input placeholder="Jane Doe" {...field} />
+                      <Input placeholder="Juan Pérez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -90,7 +91,7 @@ export function FluidAnalysisForm() {
                 name="sampleDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Sample</FormLabel>
+                    <FormLabel>Fecha de Muestra</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -98,7 +99,7 @@ export function FluidAnalysisForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -110,6 +111,7 @@ export function FluidAnalysisForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -122,7 +124,7 @@ export function FluidAnalysisForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., CAT-D6" {...field} className="font-code" />
                     </FormControl>
@@ -135,9 +137,9 @@ export function FluidAnalysisForm() {
                 name="sampleId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sample ID</FormLabel>
+                    <FormLabel>ID de Muestra</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., OIL-00123" {...field} />
+                      <Input placeholder="e.g., ACEITE-00123" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -148,18 +150,18 @@ export function FluidAnalysisForm() {
                 name="fluidType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fluid Type</FormLabel>
+                    <FormLabel>Tipo de Fluido</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select fluid type" />
+                          <SelectValue placeholder="Seleccione el tipo de fluido" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="engine_oil">Engine Oil</SelectItem>
-                        <SelectItem value="hydraulic_fluid">Hydraulic Fluid</SelectItem>
-                        <SelectItem value="coolant">Coolant</SelectItem>
-                        <SelectItem value="transmission_fluid">Transmission Fluid</SelectItem>
+                        <SelectItem value="engine_oil">Aceite de Motor</SelectItem>
+                        <SelectItem value="hydraulic_fluid">Fluido Hidráulico</SelectItem>
+                        <SelectItem value="coolant">Refrigerante</SelectItem>
+                        <SelectItem value="transmission_fluid">Fluido de Transmisión</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -171,7 +173,7 @@ export function FluidAnalysisForm() {
                 name="viscosityLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Viscosity Level (cSt)</FormLabel>
+                    <FormLabel>Nivel de Viscosidad (cSt)</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="40" {...field} />
                     </FormControl>
@@ -184,7 +186,7 @@ export function FluidAnalysisForm() {
                 name="contaminationLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contamination (ISO Code)</FormLabel>
+                    <FormLabel>Contaminación (Código ISO)</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., 18/16/13" {...field} />
                     </FormControl>
@@ -197,18 +199,18 @@ export function FluidAnalysisForm() {
                 name="actionRequired"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Action Required</FormLabel>
+                    <FormLabel>Acción Requerida</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select required action" />
+                          <SelectValue placeholder="Seleccione la acción requerida" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="monitor">Monitor</SelectItem>
-                        <SelectItem value="change_fluid">Change Fluid</SelectItem>
-                        <SelectItem value="immediate_repair">Immediate Repair Needed</SelectItem>
+                        <SelectItem value="none">Ninguna</SelectItem>
+                        <SelectItem value="monitor">Monitorear</SelectItem>
+                        <SelectItem value="change_fluid">Cambiar Fluido</SelectItem>
+                        <SelectItem value="immediate_repair">Reparación Inmediata Necesaria</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -221,15 +223,15 @@ export function FluidAnalysisForm() {
               name="analysisSummary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Analysis Summary & Recommendations</FormLabel>
+                  <FormLabel>Resumen de Análisis y Recomendaciones</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Summarize the lab findings and recommend next steps..."
+                      placeholder="Resuma los hallazgos del laboratorio y recomiende los próximos pasos..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>Include details on wear metals, additives, and overall fluid condition.</FormDescription>
+                  <FormDescription>Incluya detalles sobre metales de desgaste, aditivos y condición general del fluido.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -238,10 +240,10 @@ export function FluidAnalysisForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Analysis Report'
+                'Enviar Reporte de Análisis'
               )}
             </Button>
           </form>

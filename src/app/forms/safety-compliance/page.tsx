@@ -10,7 +10,7 @@ export default function SafetyCompliancePage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Safety Compliance Form" />
+        <AppHeader title="Reporte de Cumplimiento de Seguridad" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <SafetyComplianceForm />
