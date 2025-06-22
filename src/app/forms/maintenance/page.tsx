@@ -10,7 +10,7 @@ export default function MaintenancePage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Maintenance Form" />
+        <AppHeader title="Formulario de Mantenimiento" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <MaintenanceForm />

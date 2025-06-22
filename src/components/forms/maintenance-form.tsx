@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { CalendarDays, Loader2, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,12 +20,12 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const maintenanceFormSchema = z.object({
-  technicianName: z.string().min(2, { message: 'Technician name must be at least 2 characters.' }),
-  date: z.date({ required_error: 'A date is required.' }),
-  equipmentId: z.string().min(1, { message: 'Equipment ID is required.' }),
-  hoursOnMachine: z.coerce.number().min(0, { message: 'Hours must be a positive number.' }),
-  serviceType: z.enum(['scheduled', 'emergency', 'preventive'], { required_error: 'Please select a service type.' }),
-  workPerformed: z.string().min(10, { message: 'Please describe the work performed (min 10 characters).' }).max(500),
+  technicianName: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
+  date: z.date({ required_error: 'Se requiere una fecha.' }),
+  equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
+  hoursOnMachine: z.coerce.number().min(0, { message: 'Las horas deben ser un número positivo.' }),
+  serviceType: z.enum(['scheduled', 'emergency', 'preventive'], { required_error: 'Por favor seleccione un tipo de servicio.' }),
+  workPerformed: z.string().min(10, { message: 'Por favor describa el trabajo realizado (mínimo 10 caracteres).' }).max(500),
   safetyCheckPassed: z.boolean().default(false).optional(),
 });
 
@@ -51,7 +52,7 @@ export function MaintenanceForm() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast({
-      title: 'Form Submitted!',
+      title: '¡Formulario Enviado!',
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
@@ -66,9 +67,9 @@ export function MaintenanceForm() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Wrench className="w-6 h-6 text-primary" />
-          <CardTitle>Maintenance Visit Report</CardTitle>
+          <CardTitle>Reporte de Visita de Mantenimiento</CardTitle>
         </div>
-        <CardDescription>Fill out the details for the maintenance visit.</CardDescription>
+        <CardDescription>Complete los detalles de la visita de mantenimiento.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -79,9 +80,9 @@ export function MaintenanceForm() {
                 name="technicianName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technician Name</FormLabel>
+                    <FormLabel>Nombre del Técnico</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="Juan Pérez" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -92,7 +93,7 @@ export function MaintenanceForm() {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Service</FormLabel>
+                    <FormLabel>Fecha de Servicio</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -100,7 +101,7 @@ export function MaintenanceForm() {
                             variant={'outline'}
                             className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
                             <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -112,6 +113,7 @@ export function MaintenanceForm() {
                           onSelect={field.onChange}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -124,7 +126,7 @@ export function MaintenanceForm() {
                 name="equipmentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Equipment ID</FormLabel>
+                    <FormLabel>ID del Equipo</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., CAT-D6" {...field} className="font-code" />
                     </FormControl>
@@ -137,7 +139,7 @@ export function MaintenanceForm() {
                 name="hoursOnMachine"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hours on Machine</FormLabel>
+                    <FormLabel>Horas en la Máquina</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="5120" {...field} />
                     </FormControl>
@@ -150,17 +152,17 @@ export function MaintenanceForm() {
                 name="serviceType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Type</FormLabel>
+                    <FormLabel>Tipo de Servicio</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a service type" />
+                          <SelectValue placeholder="Seleccione un tipo de servicio" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="emergency">Emergency</SelectItem>
-                        <SelectItem value="preventive">Preventive</SelectItem>
+                        <SelectItem value="scheduled">Programado</SelectItem>
+                        <SelectItem value="emergency">Emergencia</SelectItem>
+                        <SelectItem value="preventive">Preventivo</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -173,15 +175,15 @@ export function MaintenanceForm() {
               name="workPerformed"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Work Performed</FormLabel>
+                  <FormLabel>Trabajo Realizado</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the work performed in detail..."
+                      placeholder="Describa el trabajo realizado en detalle..."
                       className="resize-y min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>A detailed description of all services and repairs.</FormDescription>
+                  <FormDescription>Una descripción detallada de todos los servicios y reparaciones.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -195,8 +197,8 @@ export function MaintenanceForm() {
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Final Safety Check Passed</FormLabel>
-                    <FormDescription>Confirm that all safety checks were completed and passed.</FormDescription>
+                    <FormLabel>Verificación de Seguridad Final Aprobada</FormLabel>
+                    <FormDescription>Confirme que todas las verificaciones de seguridad se completaron y aprobaron.</FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -205,10 +207,10 @@ export function MaintenanceForm() {
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Enviando...
                 </>
               ) : (
-                'Submit Form'
+                'Enviar Formulario'
               )}
             </Button>
           </form>

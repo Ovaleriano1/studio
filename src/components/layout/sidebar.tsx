@@ -52,14 +52,14 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarGroup>
-          <SidebarGroupLabel>Forms</SidebarGroupLabel>
+          <SidebarGroupLabel>Formularios</SidebarGroupLabel>
           <SidebarGroupContent>
              <SidebarMenu>
                 <SidebarMenuItem>
                   <Link href="/forms/maintenance" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/maintenance')}>
                       <Wrench />
-                      Maintenance
+                      Mantenimiento
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -67,7 +67,7 @@ export function AppSidebar() {
                   <Link href="/forms/inspection" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/inspection')}>
                       <ClipboardList />
-                      Inspection
+                      Inspección
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -75,7 +75,7 @@ export function AppSidebar() {
                   <Link href="/forms/work-order" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/work-order')}>
                       <FileText />
-                      Work Order
+                      Orden de Trabajo
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -83,7 +83,7 @@ export function AppSidebar() {
                   <Link href="/forms/repair" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/repair')}>
                       <Hammer />
-                      Repair
+                      Reparación
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -91,7 +91,7 @@ export function AppSidebar() {
                   <Link href="/forms/programmed-visit" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/programmed-visit')}>
                       <CalendarCheck />
-                      Programmed Visit
+                      Visita Programada
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -99,7 +99,7 @@ export function AppSidebar() {
                   <Link href="/forms/warranty" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/warranty')}>
                       <ShieldCheck />
-                      Warranty
+                      Garantía
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -114,7 +114,7 @@ export function AppSidebar() {
             <Link href="/settings" passHref>
               <SidebarMenuButton isActive={pathname.startsWith('/settings')}>
                 <Settings />
-                Settings
+                Configuración
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
