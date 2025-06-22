@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Facebook, Instagram, Youtube, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 const WhatsAppIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-5 h-5 text-white">
@@ -14,6 +16,17 @@ const WhatsAppIcon = () => (
 
 export function LoginForm() {
     const [password, setPassword] = useState('');
+    const router = useRouter();
+    const { toast } = useToast();
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        toast({
+          title: '¡Bienvenido de vuelta!',
+          description: 'Has iniciado sesión correctamente.',
+        });
+        router.push('/');
+    };
 
     return (
         <div className="w-full max-w-xs mx-auto flex flex-col items-center">
@@ -26,7 +39,7 @@ export function LoginForm() {
                 <p className="text-gray-500">Accede a tu cuenta</p>
             </div>
 
-            <form className="space-y-6 w-full">
+            <form className="space-y-6 w-full" onSubmit={handleSubmit}>
                 <fieldset className="border border-gray-400 rounded-lg px-3">
                     <legend className="px-1 text-sm text-gray-600">Correo Electronico</legend>
                     <input
