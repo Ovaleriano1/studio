@@ -1,5 +1,7 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import {
   SidebarContent,
   SidebarMenu,
@@ -23,6 +25,8 @@ import {
 } from 'lucide-react';
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
     <>
       <SidebarHeader>
@@ -36,10 +40,12 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton isActive>
-              <Home />
-              Dashboard
-            </SidebarMenuButton>
+            <Link href="/" passHref>
+              <SidebarMenuButton isActive={pathname === '/'}>
+                <Home />
+                Dashboard
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarGroup>
@@ -47,10 +53,12 @@ export function AppSidebar() {
           <SidebarGroupContent>
              <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <Wrench />
-                    Maintenance
-                  </SidebarMenuButton>
+                  <Link href="/forms/maintenance" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/maintenance')}>
+                      <Wrench />
+                      Maintenance
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton>

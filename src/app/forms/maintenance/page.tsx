@@ -1,18 +1,20 @@
 import { AppSidebar } from '@/components/layout/sidebar';
 import { AppHeader } from '@/components/layout/header';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarRail } from '@/components/ui/sidebar';
-import { Dashboard } from '@/components/dashboard';
+import { MaintenanceForm } from '@/components/forms/maintenance-form';
 
-export default function Home() {
+export default function MaintenancePage() {
   return (
     <SidebarProvider>
       <Sidebar>
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Dashboard" />
+        <AppHeader title="Maintenance Form" />
         <main className="p-4 lg:p-6">
-          <Dashboard />
+          <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
+            <MaintenanceForm />
+          </div>
         </main>
       </SidebarInset>
       <SidebarRail />
