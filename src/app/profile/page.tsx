@@ -10,7 +10,7 @@ export default function ProfilePage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="User Profile" />
+        <AppHeader title="Perfil de Usuario" />
         <main className="p-4 lg:p-6">
            <ProfileCard />
         </main>

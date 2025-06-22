@@ -13,50 +13,50 @@ export function SettingsView() {
       <CardHeader>
         <div className="flex items-center gap-2">
             <SettingsIcon className="w-6 h-6 text-primary" />
-            <CardTitle>Application Settings</CardTitle>
+            <CardTitle>Configuración de la Aplicación</CardTitle>
         </div>
-        <CardDescription>Manage your application preferences and settings.</CardDescription>
+        <CardDescription>Administre sus preferencias y configuraciones de la aplicación.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
         <div className="flex items-center justify-between space-x-2">
           <Label htmlFor="theme" className="flex flex-col space-y-1">
-            <span>Theme</span>
+            <span>Tema</span>
             <span className="font-normal leading-snug text-muted-foreground">
-              Select the application theme.
+              Seleccione el tema de la aplicación.
             </span>
           </Label>
           <Select defaultValue="system">
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select theme" />
+              <SelectValue placeholder="Seleccionar tema" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
+              <SelectItem value="light">Claro</SelectItem>
+              <SelectItem value="dark">Oscuro</SelectItem>
+              <SelectItem value="system">Sistema</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="flex items-center justify-between space-x-2">
           <Label htmlFor="email-notifications" className="flex flex-col space-y-1">
-            <span>Email Notifications</span>
+            <span>Notificaciones por Correo Electrónico</span>
             <span className="font-normal leading-snug text-muted-foreground">
-              Receive notifications about new forms and updates.
+              Reciba notificaciones sobre nuevos formularios y actualizaciones.
             </span>
           </Label>
           <Switch id="email-notifications" defaultChecked />
         </div>
         <div className="flex items-center justify-between space-x-2">
           <Label htmlFor="push-notifications" className="flex flex-col space-y-1">
-            <span>Push Notifications</span>
+            <span>Notificaciones Push</span>
             <span className="font-normal leading-snug text-muted-foreground">
-              Get push notifications on your mobile device.
+              Reciba notificaciones push en su dispositivo móvil.
             </span>
           </Label>
           <Switch id="push-notifications" />
         </div>
       </CardContent>
       <CardFooter className='border-t pt-6'>
-          <Button>Apply Changes</Button>
+          <Button>Aplicar Cambios</Button>
       </CardFooter>
     </Card>
   );

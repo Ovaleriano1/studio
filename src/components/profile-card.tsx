@@ -21,21 +21,21 @@ export function ProfileCard() {
       <CardContent className="space-y-6">
         <div className="space-y-4">
             <div className="grid gap-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">Nombre Completo</Label>
                 <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input id="name" value="Juan Gomez" readOnly className="pl-10" />
                 </div>
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Dirección de Correo Electrónico</Label>
                 <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input id="email" type="email" value="juan.gomez@camosaapp.com" readOnly className="pl-10" />
                 </div>
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">Número de Teléfono</Label>
                 <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input id="phone" type="tel" value="+1 (555) 123-4567" readOnly className="pl-10" />
@@ -43,7 +43,7 @@ export function ProfileCard() {
             </div>
         </div>
         <Button className="w-full">
-          <Edit className="mr-2 h-4 w-4" /> Edit Profile
+          <Edit className="mr-2 h-4 w-4" /> Editar Perfil
         </Button>
       </CardContent>
     </Card>

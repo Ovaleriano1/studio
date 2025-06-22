@@ -10,7 +10,7 @@ export default function SettingsPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Settings" />
+        <AppHeader title="Configuración" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
             <SettingsView />

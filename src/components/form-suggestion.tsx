@@ -16,8 +16,8 @@ import { getFormSuggestion } from '@/app/actions';
 import { Skeleton } from './ui/skeleton';
 
 const formSchema = z.object({
-  location: z.string().min(2, { message: 'Location must be at least 2 characters.' }),
-  equipmentModel: z.string().min(2, { message: 'Equipment model must be at least 2 characters.' }),
+  location: z.string().min(2, { message: 'La ubicación debe tener al menos 2 caracteres.' }),
+  equipmentModel: z.string().min(2, { message: 'El modelo de equipo debe tener al menos 2 caracteres.' }),
 });
 
 export function FormSuggestion() {
@@ -44,7 +44,7 @@ export function FormSuggestion() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get form suggestion. Please try again.',
+        description: 'No se pudo obtener la sugerencia de formulario. Por favor, inténtelo de nuevo.',
       });
     } finally {
       setIsLoading(false);
@@ -56,9 +56,9 @@ export function FormSuggestion() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Bot className="w-6 h-6 text-primary" />
-          <CardTitle className="font-headline">AI Form Suggestion</CardTitle>
+          <CardTitle className="font-headline">Sugerencia de Formulario con IA</CardTitle>
         </div>
-        <CardDescription>Enter details to get a recommendation for the most relevant form.</CardDescription>
+        <CardDescription>Ingrese los detalles para obtener una recomendación del formulario más relevante.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <Form {...form}>
@@ -68,7 +68,7 @@ export function FormSuggestion() {
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Technician Location</FormLabel>
+                  <FormLabel>Ubicación del Técnico</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., North Quarry Site" {...field} />
                   </FormControl>
@@ -81,7 +81,7 @@ export function FormSuggestion() {
               name="equipmentModel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Equipment Model</FormLabel>
+                  <FormLabel>Modelo de Equipo</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., JOHN DEERE-8R" {...field} className="font-code" />
                   </FormControl>
@@ -93,11 +93,11 @@ export function FormSuggestion() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Getting Suggestion...
+                  Obteniendo Sugerencia...
                 </>
               ) : (
                 <>
-                  Suggest Form <ChevronsRight className="ml-2 h-4 w-4" />
+                  Sugerir Formulario <ChevronsRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>
@@ -112,7 +112,7 @@ export function FormSuggestion() {
         {suggestion && (
           <Card className="mt-6 bg-background">
             <CardHeader>
-              <CardTitle className="text-lg font-headline">Suggested: {suggestion.suggestedForm}</CardTitle>
+              <CardTitle className="text-lg font-headline">Sugerido: {suggestion.suggestedForm}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">{suggestion.reasoning}</p>
@@ -120,7 +120,7 @@ export function FormSuggestion() {
             <CardFooter>
               <Button variant="default" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                 <FilePlus2 className="mr-2 h-4 w-4" />
-                Create {suggestion.suggestedForm}
+                Crear {suggestion.suggestedForm}
               </Button>
             </CardFooter>
           </Card>

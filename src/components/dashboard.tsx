@@ -6,22 +6,22 @@ import { Badge } from '@/components/ui/badge';
 import { FormSuggestion } from './form-suggestion';
 
 const recentForms = [
-  { id: 'FRM-001', type: 'Maintenance Visit', equipment: 'MACK-LR-45', status: 'Completed', date: '2024-05-20' },
-  { id: 'FRM-002', type: 'Inspection Report', equipment: 'CAT-D6', status: 'Completed', date: '2024-05-18' },
-  { id: 'FRM-003', type: 'Repair Visit', equipment: 'JOHN DEERE-8R', status: 'In Progress', date: '2024-05-22' },
-  { id: 'FRM-004', type: 'Work Order', equipment: 'VOLVO-A40G', status: 'Pending', date: '2024-05-23' },
-  { id: 'FRM-005', type: 'Maintenance Visit', equipment: 'UD-CRONER', status: 'Completed', date: '2024-05-15' },
+  { id: 'FRM-001', type: 'Visita de Mantenimiento', equipment: 'MACK-LR-45', status: 'Completado', date: '2024-05-20' },
+  { id: 'FRM-002', type: 'Reporte de Inspección', equipment: 'CAT-D6', status: 'Completado', date: '2024-05-18' },
+  { id: 'FRM-003', type: 'Visita de Reparación', equipment: 'JOHN DEERE-8R', status: 'En Progreso', date: '2024-05-22' },
+  { id: 'FRM-004', type: 'Orden de Trabajo', equipment: 'VOLVO-A40G', status: 'Pendiente', date: '2024-05-23' },
+  { id: 'FRM-005', type: 'Visita de Mantenimiento', equipment: 'UD-CRONER', status: 'Completado', date: '2024-05-15' },
 ];
 
 export function Dashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Completed':
-        return <Badge variant="default" className="bg-accent text-accent-foreground hover:bg-accent/90">Completed</Badge>;
-      case 'In Progress':
-        return <Badge variant="secondary">In Progress</Badge>;
-      case 'Pending':
-        return <Badge variant="outline">Pending</Badge>;
+      case 'Completado':
+        return <Badge variant="default" className="bg-accent text-accent-foreground hover:bg-accent/90">Completado</Badge>;
+      case 'En Progreso':
+        return <Badge variant="secondary">En Progreso</Badge>;
+      case 'Pendiente':
+        return <Badge variant="outline">Pendiente</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -35,18 +35,18 @@ export function Dashboard() {
       <div className="lg:col-span-3">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Forms</CardTitle>
-            <CardDescription>An overview of your recently submitted forms.</CardDescription>
+            <CardTitle>Formularios Recientes</CardTitle>
+            <CardDescription>Un resumen de sus formularios enviados recientemente.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Form ID</TableHead>
-                  <TableHead className="hidden sm:table-cell">Type</TableHead>
-                  <TableHead>Equipment</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead>ID de Formulario</TableHead>
+                  <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+                  <TableHead>Equipo</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
