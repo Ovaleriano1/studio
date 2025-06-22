@@ -22,6 +22,9 @@ import {
   FileText,
   Settings,
   HardHat,
+  Hammer,
+  CalendarCheck,
+  ShieldCheck,
 } from 'lucide-react';
 
 export function AppSidebar() {
@@ -69,10 +72,36 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <FileText />
-                    Work Order
-                  </SidebarMenuButton>
+                  <Link href="/forms/work-order" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/work-order')}>
+                      <FileText />
+                      Work Order
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/forms/repair" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/repair')}>
+                      <Hammer />
+                      Repair
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <Link href="/forms/programmed-visit" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/programmed-visit')}>
+                      <CalendarCheck />
+                      Programmed Visit
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <Link href="/forms/warranty" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/warranty')}>
+                      <ShieldCheck />
+                      Warranty
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
               </SidebarMenu>
           </SidebarGroupContent>
