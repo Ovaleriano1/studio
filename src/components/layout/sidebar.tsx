@@ -111,22 +111,26 @@ export function AppSidebar() {
         <Separator className="my-2 bg-sidebar-border" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Settings />
-              Settings
-            </SidebarMenuButton>
+            <Link href="/settings" passHref>
+              <SidebarMenuButton isActive={pathname.startsWith('/settings')}>
+                <Settings />
+                Settings
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="p-2 flex items-center gap-3">
-          <Avatar className="size-9">
-            <AvatarImage src="https://placehold.co/40x40.png" alt="User avatar" data-ai-hint="user avatar" />
-            <AvatarFallback>JD</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col overflow-hidden">
-            <span className="font-semibold text-sm truncate text-sidebar-foreground">John Doe</span>
-            <span className="text-xs text-sidebar-foreground/70">Technician</span>
+        <Link href="/profile" className="p-2 flex items-center gap-3 rounded-md hover:bg-sidebar-accent">
+          <div className="flex items-center gap-3">
+            <Avatar className="size-9">
+              <AvatarImage src="https://placehold.co/40x40.png" alt="User avatar" data-ai-hint="user avatar" />
+              <AvatarFallback>JG</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col overflow-hidden">
+              <span className="font-semibold text-sm truncate text-sidebar-foreground">Juan Gomez</span>
+              <span className="text-xs text-sidebar-foreground/70">Tecnico</span>
+            </div>
           </div>
-        </div>
+        </Link>
       </SidebarFooter>
     </>
   );
