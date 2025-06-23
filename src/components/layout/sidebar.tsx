@@ -136,22 +136,26 @@ export function AppSidebar() {
                       </Link>
                     </SidebarMenuItem>
                   )}
-                <SidebarMenuItem>
-                  <Link href="/forms/safety-compliance" passHref>
-                    <SidebarMenuButton isActive={pathname.startsWith('/forms/safety-compliance')}>
-                      <LifeBuoy />
-                      Cumplimiento de Seguridad
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <Link href="/forms/fluid-analysis" passHref>
-                    <SidebarMenuButton isActive={pathname.startsWith('/forms/fluid-analysis')}>
-                      <FlaskConical />
-                      Análisis de Fluidos
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
+                {profile.role !== 'user-technicians' && (
+                  <SidebarMenuItem>
+                    <Link href="/forms/safety-compliance" passHref>
+                      <SidebarMenuButton isActive={pathname.startsWith('/forms/safety-compliance')}>
+                        <LifeBuoy />
+                        Cumplimiento de Seguridad
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                )}
+                {profile.role !== 'user-technicians' && (
+                  <SidebarMenuItem>
+                    <Link href="/forms/fluid-analysis" passHref>
+                      <SidebarMenuButton isActive={pathname.startsWith('/forms/fluid-analysis')}>
+                        <FlaskConical />
+                        Análisis de Fluidos
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                )}
                  {profile.role !== 'user-technicians' && (
                   <SidebarMenuItem>
                     <Link href="/forms/rental-agreement" passHref>
