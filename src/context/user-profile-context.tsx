@@ -37,6 +37,13 @@ const users: Record<string, UserProfile> = {
     avatar: 'https://placehold.co/100x100.png',
     role: 'user-technicians',
   },
+  'kgodoy@camosa.com': {
+    name: 'Kevin Godoy',
+    email: 'kgodoy@camosa.com',
+    phone: '+504 8765-4321',
+    avatar: 'https://placehold.co/100x100.png',
+    role: 'supervisor',
+  },
 };
 
 
