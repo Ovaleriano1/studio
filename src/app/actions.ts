@@ -191,6 +191,7 @@ export async function updateReport(updatedReportData: any) {
     reports[reportIndex] = { ...updatedReportData };
     console.log('Report updated in in-memory store:', reports[reportIndex]);
     revalidatePath('/reports');
+    revalidatePath('/calendar');
     return { success: true, report: reports[reportIndex] };
   } catch (error) {
     console.error('Error updating report in in-memory store:', error);
@@ -305,6 +306,7 @@ export async function saveProgrammedVisit(reportData: any): Promise<string> {
         reports.push(newReport);
         console.log('Programmed visit saved to in-memory store:', newReport);
         revalidatePath('/reports');
+        revalidatePath('/calendar');
         return newId;
     } catch (error) {
         console.error('Error saving programmed visit:', error);
