@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { suggestRelevantForm, type SuggestRelevantFormInput, type SuggestRelevantFormOutput } from '@/ai/flows/suggest-relevant-form';
 
 // In-memory store for reports as a temporary workaround for DB connection issues.
@@ -58,6 +59,7 @@ export async function saveMaintenanceReport(reportData: any) {
     };
     reports.push(newReport);
     console.log('Maintenance report saved to in-memory store:', newReport);
+    revalidatePath('/reports');
   } catch (error) {
     console.error('Error saving maintenance report to in-memory store:', error);
     throw new Error('No se pudo guardar el reporte. Por favor, inténtelo de nuevo.');
@@ -75,6 +77,7 @@ export async function saveGeneralReport(reportData: any): Promise<string> {
     };
     reports.push(newReport);
     console.log('General report saved to in-memory store:', newReport);
+    revalidatePath('/reports');
     return newId;
   } catch (error) {
     console.error('Error saving general report to in-memory store:', error);
