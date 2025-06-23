@@ -18,6 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveInspectionReport } from '@/app/actions';
 
 const inspectionFormSchema = z.object({
   inspectorName: z.string().min(2, { message: 'El nombre del inspector debe tener al menos 2 caracteres.' }),
@@ -55,17 +56,25 @@ export function InspectionForm() {
   });
 
   async function onSubmit(data: InspectionFormValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Reporte de Inspección Enviado!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        date: data.date.toISOString(),
+      };
+      const newReportId = await saveInspectionReport(serializableData);
+      toast({
+        title: '¡Reporte de Inspección Enviado!',
+        description: `Su reporte ha sido enviado con el ID: ${newReportId}.`,
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar el reporte. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (

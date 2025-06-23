@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { saveRepairReport } from '@/app/actions';
 
 const repairFormSchema = z.object({
   technicianName: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
@@ -59,17 +60,25 @@ export function RepairForm() {
   });
 
   async function onSubmit(data: RepairFormValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Formulario de Reparación Enviado!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        date: data.date.toISOString(),
+      };
+      const newReportId = await saveRepairReport(serializableData);
+      toast({
+        title: '¡Formulario de Reparación Enviado!',
+        description: `Su reporte de reparación ha sido enviado con el ID: ${newReportId}.`
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar el reporte. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (

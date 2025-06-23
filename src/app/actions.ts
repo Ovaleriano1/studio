@@ -84,3 +84,41 @@ export async function saveGeneralReport(reportData: any): Promise<string> {
     throw new Error('No se pudo guardar el reporte. Por favor, inténtelo de nuevo.');
   }
 }
+
+export async function saveInspectionReport(reportData: any): Promise<string> {
+    try {
+        const newId = `INSP-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Reporte de Inspección',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Inspection report saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving inspection report:', error);
+        throw new Error('No se pudo guardar el reporte de inspección. Por favor, inténtelo de nuevo.');
+    }
+}
+
+export async function saveRepairReport(reportData: any): Promise<string> {
+    try {
+        const newId = `REP-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Reporte de Reparación',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Repair report saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving repair report:', error);
+        throw new Error('No se pudo guardar el reporte de reparación. Por favor, inténtelo de nuevo.');
+    }
+}
