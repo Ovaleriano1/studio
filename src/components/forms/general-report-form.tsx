@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2, FilePlus } from 'lucide-react';
-import jsPDF from 'jspdf';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +34,8 @@ export function GeneralReportForm() {
     },
   });
 
-  const generatePdf = (data: GeneralReportValues, reportId: string) => {
+  const generatePdf = async (data: GeneralReportValues, reportId: string) => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
 
     doc.setFont('helvetica', 'bold');
@@ -88,7 +88,7 @@ export function GeneralReportForm() {
         description: `Su reporte general ha sido enviado con el ID: ${newReportId}.`,
       });
       
-      generatePdf(data, newReportId);
+      await generatePdf(data, newReportId);
 
       form.reset();
     } catch (error) {

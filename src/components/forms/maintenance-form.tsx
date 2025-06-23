@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { CalendarDays, Loader2, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import jsPDF from 'jspdf';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -57,7 +56,8 @@ export function MaintenanceForm() {
     },
   });
 
-  const generatePdf = (data: MaintenanceFormValues, reportId: string) => {
+  const generatePdf = async (data: MaintenanceFormValues, reportId: string) => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     
     const serviceTypeMap: { [key: string]: string } = {
@@ -136,7 +136,7 @@ export function MaintenanceForm() {
         description: `Su reporte de mantenimiento ha sido enviado con el ID: ${newReportId}.`,
       });
       
-      generatePdf(data, newReportId);
+      await generatePdf(data, newReportId);
 
       form.reset();
     } catch (error) {
