@@ -30,6 +30,7 @@ import {
   FileSignature,
   FilePlus,
   FileSpreadsheet,
+  Calendar,
 } from 'lucide-react';
 import { useUserProfile } from '@/context/user-profile-context';
 
@@ -69,6 +70,14 @@ export function AppSidebar() {
               <SidebarMenuButton isActive={pathname === '/reports'}>
                 <FileSpreadsheet />
                 Reportes
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Link href="/calendar" passHref>
+              <SidebarMenuButton isActive={pathname === '/calendar'}>
+                <Calendar />
+                Calendario
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
