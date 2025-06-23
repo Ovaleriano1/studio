@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Facebook, Instagram, Youtube, X } from 'lucide-react';
+import { Facebook, Instagram, Youtube, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
 
 const WhatsAppIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-5 h-5 text-white">
@@ -15,17 +17,49 @@ const WhatsAppIcon = () => (
 );
 
 export function LoginForm() {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        toast({
-          title: '¡Bienvenido de vuelta!',
-          description: 'Has iniciado sesión correctamente.',
-        });
-        router.push('/');
+        setIsLoading(true);
+
+        if (!email || !password) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Por favor, ingrese su correo y contraseña.',
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            toast({
+              title: '¡Bienvenido de vuelta!',
+              description: 'Has iniciado sesión correctamente.',
+            });
+            router.push('/');
+        } catch (error: any) {
+            console.error("Firebase Auth Error:", error);
+            let errorMessage = 'Ocurrió un error al iniciar sesión. Por favor, inténtelo de nuevo.';
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                errorMessage = 'Credenciales incorrectas. Por favor, verifique su correo y contraseña.';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = 'El formato del correo electrónico no es válido.';
+            }
+            toast({
+                variant: 'destructive',
+                title: 'Error de Autenticación',
+                description: errorMessage,
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -44,8 +78,11 @@ export function LoginForm() {
                     <legend className="px-1 text-sm text-gray-600">Correo Electronico</legend>
                     <input
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-transparent py-2 border-0 focus:outline-none focus:ring-0 text-sm"
                         autoComplete="email"
+                        disabled={isLoading}
                     />
                 </fieldset>
 
@@ -57,16 +94,24 @@ export function LoginForm() {
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full bg-transparent py-2 border-0 focus:outline-none focus:ring-0 text-sm pr-8"
                         autoComplete="current-password"
+                        disabled={isLoading}
                     />
-                     {password && (
+                     {password && !isLoading && (
                         <button type="button" onClick={() => setPassword('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                             <X className="h-5 w-5" />
                         </button>
                     )}
                 </fieldset>
 
-                <Button type="submit" className="w-full bg-[#5d6a53] hover:bg-[#4a5542] text-white rounded-full font-semibold py-3 text-base">
-                    Acceder
+                <Button type="submit" className="w-full bg-[#5d6a53] hover:bg-[#4a5542] text-white rounded-full font-semibold py-3 text-base" disabled={isLoading}>
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Accediendo...
+                        </>
+                    ) : (
+                        'Acceder'
+                    )}
                 </Button>
             </form>
 
