@@ -16,11 +16,20 @@ export async function getFormSuggestion(input: SuggestRelevantFormInput): Promis
 
 export async function saveMaintenanceReport(reportData: any) {
   try {
-    const reportWithTimestamp = {
+    // Data from the client has dates as ISO strings.
+    // Convert them to Firestore Timestamps for proper storage.
+    const dataToSave = {
       ...reportData,
+      date: Timestamp.fromDate(new Date(reportData.date)),
       createdAt: Timestamp.now(),
     };
-    await addDoc(collection(db, 'maintenanceReports'), reportWithTimestamp);
+
+    // The 'nextServiceDate' is optional, so we only add it if it exists.
+    if (reportData.nextServiceDate) {
+      dataToSave.nextServiceDate = Timestamp.fromDate(new Date(reportData.nextServiceDate));
+    }
+
+    await addDoc(collection(db, 'maintenanceReports'), dataToSave);
   } catch (error) {
     console.error('Error saving maintenance report to Firestore:', error);
     throw new Error('Could not save the report. Please try again.');

@@ -58,7 +58,14 @@ export function MaintenanceForm() {
 
   async function onSubmit(data: MaintenanceFormValues) {
     try {
-      await saveMaintenanceReport(data);
+      // Convert Date objects to ISO strings for reliable serialization.
+      const serializableData = {
+        ...data,
+        date: data.date.toISOString(),
+        ...(data.nextServiceDate && { nextServiceDate: data.nextServiceDate.toISOString() }),
+      };
+
+      await saveMaintenanceReport(serializableData);
       toast({
         title: '¡Reporte Guardado!',
         description: 'Su reporte de mantenimiento ha sido guardado en la base de datos.',
