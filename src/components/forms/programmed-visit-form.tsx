@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { CalendarDays, Loader2, CalendarCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +34,7 @@ type ProgrammedVisitValues = z.infer<typeof programmedVisitSchema>;
 
 export function ProgrammedVisitForm() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<ProgrammedVisitValues>({
     resolver: zodResolver(programmedVisitSchema),
     defaultValues: {
@@ -58,6 +60,7 @@ export function ProgrammedVisitForm() {
         description: `La visita ha sido programada con el ID: ${newReportId}.`,
       });
       form.reset();
+      router.push('/calendar');
     } catch (error) {
       console.error(error);
       toast({
