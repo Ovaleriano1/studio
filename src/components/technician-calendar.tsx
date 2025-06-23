@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
-import { getReports } from '@/app/actions';
 import { format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Skeleton } from './ui/skeleton';
 import { ScrollArea } from './ui/scroll-area';
 
 interface ProgrammedVisit {
@@ -18,30 +16,19 @@ interface ProgrammedVisit {
     assignedTechnician: string;
 }
 
-export function TechnicianCalendar() {
-    const [appointments, setAppointments] = useState<ProgrammedVisit[]>([]);
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-    const [isLoading, setIsLoading] = useState(true);
+interface TechnicianCalendarProps {
+    initialAppointments: ProgrammedVisit[];
+}
 
-    useEffect(() => {
-        async function fetchAppointments() {
-            try {
-                const allReports = await getReports();
-                const programmedVisits: ProgrammedVisit[] = allReports
-                    .filter(report => report.formType === 'Visita Programada' && report.scheduledDate)
-                    .map(report => ({
-                        ...report,
-                        scheduledDate: new Date(report.scheduledDate) 
-                    }));
-                setAppointments(programmedVisits);
-            } catch (error) {
-                console.error("Failed to fetch appointments", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchAppointments();
-    }, []);
+export function TechnicianCalendar({ initialAppointments = [] }: TechnicianCalendarProps) {
+    // Data is passed as a prop from a Server Component.
+    // It might be serialized, so we ensure scheduledDate is a Date object.
+    const appointments = useMemo(() => 
+        initialAppointments.map(a => ({...a, scheduledDate: new Date(a.scheduledDate)})), 
+        [initialAppointments]
+    );
+
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
     const appointmentDates = useMemo(() => appointments.map(app => app.scheduledDate), [appointments]);
 
@@ -69,7 +56,6 @@ export function TechnicianCalendar() {
                             borderRadius: '50%',
                         }
                     }}
-                    disabled={isLoading}
                 />
             </Card>
 
@@ -83,31 +69,24 @@ export function TechnicianCalendar() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {isLoading ? (
-                         <div className="space-y-4">
-                            <Skeleton className="h-20 w-full" />
-                            <Skeleton className="h-20 w-full" />
-                        </div>
-                    ) : (
-                        <ScrollArea className="h-[400px]">
-                            <div className="space-y-4 pr-4">
-                                {selectedDayAppointments.length > 0 ? (
-                                    selectedDayAppointments.map(app => (
-                                        <div key={app.id} className="p-4 border rounded-lg shadow-sm bg-background">
-                                            <h3 className="font-semibold text-primary">{app.clientName}</h3>
-                                            <p className="text-sm text-muted-foreground">{app.location}</p>
-                                            <p className="text-sm mt-2">{app.visitPurpose}</p>
-                                             <p className="text-xs text-muted-foreground mt-2">Técnico: {app.assignedTechnician}</p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="flex items-center justify-center h-full">
-                                        <p className="text-center text-muted-foreground py-8">Seleccione un día del calendario para ver las citas.</p>
+                    <ScrollArea className="h-[400px]">
+                        <div className="space-y-4 pr-4">
+                            {selectedDayAppointments.length > 0 ? (
+                                selectedDayAppointments.map(app => (
+                                    <div key={app.id} className="p-4 border rounded-lg shadow-sm bg-background">
+                                        <h3 className="font-semibold text-primary">{app.clientName}</h3>
+                                        <p className="text-sm text-muted-foreground">{app.location}</p>
+                                        <p className="text-sm mt-2">{app.visitPurpose}</p>
+                                         <p className="text-xs text-muted-foreground mt-2">Técnico: {app.assignedTechnician}</p>
                                     </div>
-                                )}
-                            </div>
-                        </ScrollArea>
-                    )}
+                                ))
+                            ) : (
+                                <div className="flex items-center justify-center h-full">
+                                    <p className="text-center text-muted-foreground py-8">Seleccione un día del calendario para ver las citas.</p>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
                 </CardContent>
             </Card>
         </div>

@@ -2,8 +2,18 @@ import { AppSidebar } from '@/components/layout/sidebar';
 import { AppHeader } from '@/components/layout/header';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarRail } from '@/components/ui/sidebar';
 import { TechnicianCalendar } from '@/components/technician-calendar';
+import { getReports } from '@/app/actions';
 
-export default function CalendarPage() {
+export default async function CalendarPage() {
+  const allReports = await getReports();
+  const programmedVisits = allReports
+    .filter(report => report.formType === 'Visita Programada' && report.scheduledDate)
+    .map(report => ({
+        ...report,
+        // Ensure scheduledDate is a Date object before passing, although it will be serialized
+        scheduledDate: new Date(report.scheduledDate)
+    }));
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -13,7 +23,7 @@ export default function CalendarPage() {
         <AppHeader title="Calendario de Citas" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-             <TechnicianCalendar />
+             <TechnicianCalendar initialAppointments={programmedVisits} />
           </div>
         </main>
       </SidebarInset>
