@@ -36,10 +36,10 @@ export function GeneralReportForm() {
 
   async function onSubmit(data: GeneralReportValues) {
     try {
-      await saveGeneralReport(data);
+      const newReportId = await saveGeneralReport(data);
       toast({
         title: '¡Reporte Guardado!',
-        description: 'Su reporte general ha sido guardado en la base de datos.',
+        description: `Su reporte general ha sido guardado con el ID: ${newReportId}.`,
       });
       form.reset();
     } catch (error) {

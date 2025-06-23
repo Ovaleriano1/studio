@@ -36,13 +36,14 @@ export async function saveMaintenanceReport(reportData: any) {
   }
 }
 
-export async function saveGeneralReport(reportData: any) {
+export async function saveGeneralReport(reportData: any): Promise<string> {
   try {
     const dataToSave = {
       ...reportData,
       createdAt: Timestamp.now(),
     };
-    await addDoc(collection(db, 'generalReports'), dataToSave);
+    const docRef = await addDoc(collection(db, 'generalReports'), dataToSave);
+    return docRef.id;
   } catch (error) {
     console.error('Error saving general report to Firestore:', error);
     throw new Error('Could not save the report. Please try again.');
