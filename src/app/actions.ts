@@ -48,6 +48,23 @@ export async function getReports(): Promise<any[]> {
   return JSON.parse(JSON.stringify(reports));
 }
 
+export async function updateReport(updatedReportData: any) {
+  try {
+    const reportIndex = reports.findIndex(r => r.id === updatedReportData.id);
+    if (reportIndex === -1) {
+      throw new Error('Reporte no encontrado.');
+    }
+    // Update the report in the array
+    reports[reportIndex] = { ...updatedReportData };
+    console.log('Report updated in in-memory store:', reports[reportIndex]);
+    revalidatePath('/reports');
+    return { success: true, report: reports[reportIndex] };
+  } catch (error) {
+    console.error('Error updating report in in-memory store:', error);
+    throw new Error('No se pudo actualizar el reporte. Por favor, inténtelo de nuevo.');
+  }
+}
+
 
 export async function saveMaintenanceReport(reportData: any) {
   try {
