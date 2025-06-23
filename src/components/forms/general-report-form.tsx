@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2, FilePlus } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +35,51 @@ export function GeneralReportForm() {
     },
   });
 
+  const generatePdf = (data: GeneralReportValues, reportId: string) => {
+    const doc = new jsPDF();
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('Reporte General', 105, 20, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    const submissionDate = new Date().toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    doc.text(`ID del Reporte: ${reportId}`, 20, 40);
+    doc.text(`Fecha de Envío: ${submissionDate}`, 20, 48);
+
+    doc.line(20, 55, 190, 55);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Nombre del Reporte:', 20, 65);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.reportName, 70, 65);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Enviado Por:', 20, 75);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.submittedBy, 70, 75);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Ubicación:', 20, 85);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.location, 70, 85);
+
+    doc.line(20, 95, 190, 95);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Detalles del Reporte:', 20, 105);
+    doc.setFont('helvetica', 'normal');
+    const splitDetails = doc.splitTextToSize(data.details, 170);
+    doc.text(splitDetails, 20, 113);
+
+    doc.save(`reporte-general-${reportId}.pdf`);
+  };
+
   async function onSubmit(data: GeneralReportValues) {
     try {
       const newReportId = await saveGeneralReport(data);
@@ -41,6 +87,9 @@ export function GeneralReportForm() {
         title: '¡Reporte Enviado!',
         description: `Su reporte general ha sido enviado con el ID: ${newReportId}.`,
       });
+      
+      generatePdf(data, newReportId);
+
       form.reset();
     } catch (error) {
       console.error(error);
