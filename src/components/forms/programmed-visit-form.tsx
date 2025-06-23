@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveProgrammedVisit } from '@/app/actions';
 
 const programmedVisitSchema = z.object({
   clientName: z.string().min(2, { message: 'El nombre del cliente debe tener al menos 2 caracteres.' }),
@@ -46,17 +47,25 @@ export function ProgrammedVisitForm() {
   });
 
   async function onSubmit(data: ProgrammedVisitValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Visita Programada!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        scheduledDate: data.scheduledDate.toISOString(),
+      };
+      const newReportId = await saveProgrammedVisit(serializableData);
+      toast({
+        title: '¡Visita Programada!',
+        description: `La visita ha sido programada con el ID: ${newReportId}.`,
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Programar',
+        description: 'No se pudo programar la visita. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (

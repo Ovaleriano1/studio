@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveRentalAgreement } from '@/app/actions';
 
 const rentalAgreementSchema = z.object({
   customerName: z.string().min(2, 'Se requiere el nombre del cliente.'),
@@ -53,17 +54,26 @@ export function RentalAgreementForm() {
   });
 
   async function onSubmit(data: RentalAgreementValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Contrato de Alquiler Creado!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        rentalStartDate: data.rentalStartDate.toISOString(),
+        rentalEndDate: data.rentalEndDate.toISOString(),
+      };
+      const newReportId = await saveRentalAgreement(serializableData);
+      toast({
+        title: '¡Contrato de Alquiler Creado!',
+        description: `El contrato ha sido creado con el ID: ${newReportId}.`,
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Crear',
+        description: 'No se pudo crear el contrato. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (

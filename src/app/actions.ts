@@ -122,3 +122,117 @@ export async function saveRepairReport(reportData: any): Promise<string> {
         throw new Error('No se pudo guardar el reporte de reparación. Por favor, inténtelo de nuevo.');
     }
 }
+
+export async function saveWorkOrder(reportData: any): Promise<string> {
+    try {
+        const newId = `OT-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Orden de Trabajo',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Work order saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving work order:', error);
+        throw new Error('No se pudo guardar la orden de trabajo. Por favor, inténtelo de nuevo.');
+    }
+}
+
+export async function saveProgrammedVisit(reportData: any): Promise<string> {
+    try {
+        const newId = `PV-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Visita Programada',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Programmed visit saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving programmed visit:', error);
+        throw new Error('No se pudo guardar la visita programada. Por favor, inténtelo de nuevo.');
+    }
+}
+
+export async function saveWarrantyClaim(reportData: any): Promise<string> {
+    try {
+        const newId = `WAR-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Reclamo de Garantía',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Warranty claim saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving warranty claim:', error);
+        throw new Error('No se pudo guardar el reclamo de garantía. Por favor, inténtelo de nuevo.');
+    }
+}
+
+export async function saveSafetyReport(reportData: any): Promise<string> {
+    try {
+        const newId = `SAFE-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Reporte de Cumplimiento de Seguridad',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Safety report saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving safety report:', error);
+        throw new Error('No se pudo guardar el reporte de seguridad. Por favor, inténtelo de nuevo.');
+    }
+}
+
+export async function saveFluidAnalysis(reportData: any): Promise<string> {
+    try {
+        const newId = `FLUID-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Reporte de Análisis de Fluidos',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Fluid analysis saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving fluid analysis:', error);
+        throw new Error('No se pudo guardar el reporte de análisis de fluidos. Por favor, inténtelo de nuevo.');
+    }
+}
+
+export async function saveRentalAgreement(reportData: any): Promise<string> {
+    try {
+        const newId = `RENT-${String(Date.now()).slice(-6)}`;
+        const newReport = {
+            ...reportData,
+            id: newId,
+            formType: 'Contrato de Alquiler',
+            createdAt: new Date().toISOString(),
+        };
+        reports.push(newReport);
+        console.log('Rental agreement saved to in-memory store:', newReport);
+        revalidatePath('/reports');
+        return newId;
+    } catch (error) {
+        console.error('Error saving rental agreement:', error);
+        throw new Error('No se pudo guardar el contrato de alquiler. Por favor, inténtelo de nuevo.');
+    }
+}

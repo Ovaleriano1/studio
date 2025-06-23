@@ -17,6 +17,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveWarrantyClaim } from '@/app/actions';
 
 const warrantyFormSchema = z.object({
   customerName: z.string().min(2, { message: 'Se requiere el nombre del cliente.' }),
@@ -59,17 +60,26 @@ export function WarrantyForm() {
   });
 
   async function onSubmit(data: WarrantyFormValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Reclamo de Garantía Enviado!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        purchaseDate: data.purchaseDate.toISOString(),
+        failureDate: data.failureDate.toISOString(),
+      };
+      const newReportId = await saveWarrantyClaim(serializableData);
+      toast({
+        title: '¡Reclamo de Garantía Enviado!',
+        description: `El reclamo ha sido enviado con el ID: ${newReportId}.`,
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar el reclamo. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (

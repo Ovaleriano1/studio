@@ -18,6 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveSafetyReport } from '@/app/actions';
 
 const safetyFormSchema = z.object({
   reportDate: z.date({ required_error: 'Se requiere una fecha.' }),
@@ -49,17 +50,25 @@ export function SafetyComplianceForm() {
   });
 
   async function onSubmit(data: SafetyFormValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Reporte de Seguridad Enviado!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        reportDate: data.reportDate.toISOString(),
+      };
+      const newReportId = await saveSafetyReport(serializableData);
+      toast({
+        title: '¡Reporte de Seguridad Enviado!',
+        description: `El reporte ha sido enviado con el ID: ${newReportId}.`,
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar el reporte. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (

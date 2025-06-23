@@ -17,6 +17,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveWorkOrder } from '@/app/actions';
 
 const workOrderFormSchema = z.object({
   clientName: z.string().min(2, { message: 'El nombre del cliente debe tener al menos 2 caracteres.' }),
@@ -53,17 +54,25 @@ export function WorkOrderForm() {
   });
 
   async function onSubmit(data: WorkOrderFormValues) {
-    console.log(data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast({
-      title: '¡Orden de Trabajo Enviada!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      const serializableData = {
+        ...data,
+        date: data.date.toISOString(),
+      };
+      const newReportId = await saveWorkOrder(serializableData);
+      toast({
+        title: '¡Orden de Trabajo Enviada!',
+        description: `La orden de trabajo ha sido enviada con el ID: ${newReportId}.`,
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar la orden de trabajo. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (
