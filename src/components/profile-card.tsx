@@ -8,25 +8,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, Mail, Phone, Edit, Save, X, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/context/user-profile-context';
 
 
 export function ProfileCard() {
   const { toast } = useToast();
+  const { profile, updateProfile } = useUserProfile();
   const [isEditing, setIsEditing] = useState(false);
   
-  // State for original data to allow cancellation
-  const [originalUserData, setOriginalUserData] = useState({
-    name: 'Juan Gomez',
-    email: 'juan.gomez@camosaapp.com',
-    phone: '+1 (555) 123-4567',
-    avatar: 'https://placehold.co/100x100.png'
-  });
-
   // State for editable data
-  const [name, setName] = useState(originalUserData.name);
-  const [email, setEmail] = useState(originalUserData.email);
-  const [phone, setPhone] = useState(originalUserData.phone);
-  const [avatarPreview, setAvatarPreview] = useState(originalUserData.avatar);
+  const [name, setName] = useState(profile.name);
+  const [email, setEmail] = useState(profile.email);
+  const [phone, setPhone] = useState(profile.phone);
+  const [avatarPreview, setAvatarPreview] = useState(profile.avatar);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,10 +47,17 @@ export function ProfileCard() {
     }
   };
 
+  const handleEditClick = () => {
+    setName(profile.name);
+    setEmail(profile.email);
+    setPhone(profile.phone);
+    setAvatarPreview(profile.avatar);
+    setIsEditing(true);
+  };
+
   const handleSave = () => {
-    // In a real app, you'd send this data to a server
     const updatedUserData = { name, email, phone, avatar: avatarPreview };
-    setOriginalUserData(updatedUserData);
+    updateProfile(updatedUserData);
     setIsEditing(false);
     toast({
       title: 'Perfil Actualizado',
@@ -65,11 +66,6 @@ export function ProfileCard() {
   };
 
   const handleCancel = () => {
-    // Revert changes to original state
-    setName(originalUserData.name);
-    setEmail(originalUserData.email);
-    setPhone(originalUserData.phone);
-    setAvatarPreview(originalUserData.avatar);
     setIsEditing(false);
   };
 
@@ -81,8 +77,8 @@ export function ProfileCard() {
           onClick={handleAvatarClick}
         >
           <Avatar className="w-24 h-24">
-            <AvatarImage src={avatarPreview} alt={name} data-ai-hint="user avatar" />
-            <AvatarFallback>{name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={isEditing ? avatarPreview : profile.avatar} alt={profile.name} data-ai-hint="user avatar" />
+            <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           {isEditing && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer transition-opacity opacity-0 group-hover:opacity-100">
@@ -98,8 +94,8 @@ export function ProfileCard() {
           accept="image/*"
         />
 
-        <CardTitle className="text-3xl font-headline">{name}</CardTitle>
-        <CardDescription className="text-lg text-primary">Tecnico</CardDescription>
+        <CardTitle className="text-3xl font-headline">{profile.name}</CardTitle>
+        <CardDescription className="text-lg text-primary">{profile.role}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -136,7 +132,7 @@ export function ProfileCard() {
             </Button>
           </div>
         ) : (
-          <Button className="w-full" onClick={() => setIsEditing(true)}>
+          <Button className="w-full" onClick={handleEditClick}>
             <Edit className="mr-2 h-4 w-4" /> Editar Perfil
           </Button>
         )}

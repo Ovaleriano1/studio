@@ -31,9 +31,11 @@ import {
   FilePlus,
   FileSpreadsheet,
 } from 'lucide-react';
+import { useUserProfile } from '@/context/user-profile-context';
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { profile } = useUserProfile();
 
   return (
     <>
@@ -167,12 +169,12 @@ export function AppSidebar() {
         <Link href="/profile" className="p-2 flex items-center gap-3 rounded-md hover:bg-sidebar-accent">
           <div className="flex items-center gap-3">
             <Avatar className="size-9">
-              <AvatarImage src="https://placehold.co/40x40.png" alt="User avatar" data-ai-hint="user avatar" />
-              <AvatarFallback>JG</AvatarFallback>
+              <AvatarImage src={profile.avatar} alt="User avatar" data-ai-hint="user avatar" />
+              <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col overflow-hidden">
-              <span className="font-semibold text-sm truncate text-sidebar-foreground">Juan Gomez</span>
-              <span className="text-xs text-sidebar-foreground/70">Tecnico</span>
+              <span className="font-semibold text-sm truncate text-sidebar-foreground">{profile.name}</span>
+              <span className="text-xs text-sidebar-foreground/70">{profile.role}</span>
             </div>
           </div>
         </Link>
