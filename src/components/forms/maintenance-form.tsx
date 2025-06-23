@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { CalendarDays, Loader2, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import jsPDF from 'jspdf';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,20 +57,87 @@ export function MaintenanceForm() {
     },
   });
 
+  const generatePdf = (data: MaintenanceFormValues, reportId: string) => {
+    const doc = new jsPDF();
+    
+    const serviceTypeMap: { [key: string]: string } = {
+        scheduled: 'Programado',
+        emergency: 'Emergencia',
+        preventive: 'Preventivo',
+    };
+    const fluidCheckMap: { [key: string]: string } = {
+        ok: 'OK',
+        refill: 'Requiere Relleno',
+        na: 'No Aplica',
+    };
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('Reporte de Visita de Mantenimiento', 105, 20, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`ID del Reporte: ${reportId}`, 20, 40);
+    doc.text(`Fecha de Envío: ${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}`, 20, 48);
+
+    doc.line(20, 55, 190, 55);
+
+    let y = 65;
+
+    const addField = (label: string, value: string | number | null | undefined) => {
+      if (value !== undefined && value !== null && value !== '') {
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${label}:`, 20, y);
+        doc.setFont('helvetica', 'normal');
+        
+        const text = String(value);
+        const splitText = doc.splitTextToSize(text, 120);
+        doc.text(splitText, 75, y);
+        y += (splitText.length * 5) + 5; 
+      }
+    };
+    
+    addField('Nombre del Técnico', data.technicianName);
+    addField('Nombre del Cliente', data.clientName);
+    addField('Fecha de Servicio', format(data.date, 'PPP', { locale: es }));
+    addField('ID del Equipo', data.equipmentId);
+    addField('Horas en la Máquina', data.hoursOnMachine);
+    addField('Tipo de Servicio', serviceTypeMap[data.serviceType]);
+    if(data.workOrderNumber) addField('Nº de Orden de Trabajo', data.workOrderNumber);
+    addField('Revisión de Fluidos', fluidCheckMap[data.fluidCheck]);
+    addField('Presión de Neumáticos', data.tirePressure);
+    if(data.nextServiceDate) addField('Fecha Próximo Servicio', format(data.nextServiceDate, 'PPP', { locale: es }));
+    addField('Verificación de Seguridad Aprobada', data.safetyCheckPassed ? 'Sí' : 'No');
+    
+    y += 5;
+    doc.line(20, y - 3, 190, y - 3);
+
+    addField('Trabajo Realizado', data.workPerformed);
+    if (data.partsUsed) {
+      addField('Repuestos Utilizados', data.partsUsed);
+    } else {
+      addField('Repuestos Utilizados', 'Ninguno');
+    }
+
+    doc.save(`reporte-mantenimiento-${reportId}.pdf`);
+  };
+
   async function onSubmit(data: MaintenanceFormValues) {
     try {
-      // Convert Date objects to ISO strings for reliable serialization.
       const serializableData = {
         ...data,
         date: data.date.toISOString(),
         ...(data.nextServiceDate && { nextServiceDate: data.nextServiceDate.toISOString() }),
       };
 
-      await saveMaintenanceReport(serializableData);
+      const newReportId = await saveMaintenanceReport(serializableData);
       toast({
         title: '¡Reporte Enviado!',
-        description: 'Su reporte de mantenimiento ha sido enviado exitosamente.',
+        description: `Su reporte de mantenimiento ha sido enviado con el ID: ${newReportId}.`,
       });
+      
+      generatePdf(data, newReportId);
+
       form.reset();
     } catch (error) {
       console.error(error);

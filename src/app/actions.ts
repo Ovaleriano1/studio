@@ -147,7 +147,7 @@ export async function updateReport(updatedReportData: any) {
 }
 
 
-export async function saveMaintenanceReport(reportData: any) {
+export async function saveMaintenanceReport(reportData: any): Promise<string> {
   try {
     const newReport = {
       ...reportData,
@@ -158,6 +158,7 @@ export async function saveMaintenanceReport(reportData: any) {
     reports.push(newReport);
     console.log('Maintenance report saved to in-memory store:', newReport);
     revalidatePath('/reports');
+    return newReport.id;
   } catch (error) {
     console.error('Error saving maintenance report to in-memory store:', error);
     throw new Error('No se pudo guardar el reporte. Por favor, inténtelo de nuevo.');
