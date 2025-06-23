@@ -37,6 +37,13 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { profile } = useUserProfile();
 
+  const roleDisplayNames: { [key: string]: string } = {
+    admin: 'Administrador',
+    superuser: 'Superusuario',
+    supervisor: 'Supervisor',
+    'user-technicians': 'Técnico',
+  };
+
   return (
     <>
       <SidebarHeader>
@@ -157,14 +164,16 @@ export function AppSidebar() {
       <SidebarFooter>
         <Separator className="my-2 bg-sidebar-border" />
         <SidebarMenu>
-          <SidebarMenuItem>
-            <Link href="/settings" passHref>
-              <SidebarMenuButton isActive={pathname.startsWith('/settings')}>
-                <Settings />
-                Configuración
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
+          {profile.role === 'admin' && (
+            <SidebarMenuItem>
+              <Link href="/settings" passHref>
+                <SidebarMenuButton isActive={pathname.startsWith('/settings')}>
+                  <Settings />
+                  Configuración
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
         <Link href="/profile" className="p-2 flex items-center gap-3 rounded-md hover:bg-sidebar-accent">
           <div className="flex items-center gap-3">
@@ -174,7 +183,7 @@ export function AppSidebar() {
             </Avatar>
             <div className="flex flex-col overflow-hidden">
               <span className="font-semibold text-sm truncate text-sidebar-foreground">{profile.name}</span>
-              <span className="text-xs text-sidebar-foreground/70">{profile.role}</span>
+              <span className="text-xs text-sidebar-foreground/70">{roleDisplayNames[profile.role]}</span>
             </div>
           </div>
         </Link>

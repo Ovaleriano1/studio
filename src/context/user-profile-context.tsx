@@ -2,12 +2,16 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+// Define the available roles
+export const ROLES = ['admin', 'superuser', 'supervisor', 'user-technicians'] as const;
+export type Role = (typeof ROLES)[number];
+
 interface UserProfile {
   name: string;
   email: string;
   phone: string;
   avatar: string;
-  role: string;
+  role: Role;
 }
 
 interface UserProfileContextType {
@@ -18,9 +22,9 @@ interface UserProfileContextType {
 const defaultProfile: UserProfile = {
   name: 'Juan Gomez',
   email: 'juan.gomez@camosaapp.com',
-  phone: '+1 (555) 123-4567',
+  phone: '+504 9876-5432',
   avatar: 'https://placehold.co/100x100.png',
-  role: 'Tecnico',
+  role: 'user-technicians',
 };
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);

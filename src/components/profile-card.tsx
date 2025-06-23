@@ -6,23 +6,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Mail, Phone, Edit, Save, X, Camera } from 'lucide-react';
+import { User, Mail, Phone, Edit, Save, X, Camera, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useUserProfile } from '@/context/user-profile-context';
-
+import { useUserProfile, ROLES, type Role } from '@/context/user-profile-context';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function ProfileCard() {
   const { toast } = useToast();
   const { profile, updateProfile } = useUserProfile();
   const [isEditing, setIsEditing] = useState(false);
   
-  // State for editable data
   const [name, setName] = useState(profile.name);
   const [email, setEmail] = useState(profile.email);
   const [phone, setPhone] = useState(profile.phone);
+  const [role, setRole] = useState<Role>(profile.role);
   const [avatarPreview, setAvatarPreview] = useState(profile.avatar);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const roleDisplayNames: Record<Role, string> = {
+    admin: 'Administrador',
+    superuser: 'Superusuario',
+    supervisor: 'Supervisor',
+    'user-technicians': 'Técnico',
+  };
 
   const handleAvatarClick = () => {
     if (isEditing) {
@@ -51,12 +58,13 @@ export function ProfileCard() {
     setName(profile.name);
     setEmail(profile.email);
     setPhone(profile.phone);
+    setRole(profile.role);
     setAvatarPreview(profile.avatar);
     setIsEditing(true);
   };
 
   const handleSave = () => {
-    const updatedUserData = { name, email, phone, avatar: avatarPreview };
+    const updatedUserData = { name, email, phone, avatar: avatarPreview, role };
     updateProfile(updatedUserData);
     setIsEditing(false);
     toast({
@@ -78,7 +86,7 @@ export function ProfileCard() {
         >
           <Avatar className="w-24 h-24">
             <AvatarImage src={isEditing ? avatarPreview : profile.avatar} alt={profile.name} data-ai-hint="user avatar" />
-            <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{(isEditing ? name : profile.name).substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           {isEditing && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer transition-opacity opacity-0 group-hover:opacity-100">
@@ -94,8 +102,8 @@ export function ProfileCard() {
           accept="image/*"
         />
 
-        <CardTitle className="text-3xl font-headline">{profile.name}</CardTitle>
-        <CardDescription className="text-lg text-primary">{profile.role}</CardDescription>
+        <CardTitle className="text-3xl font-headline">{isEditing ? name : profile.name}</CardTitle>
+        <CardDescription className="text-lg text-primary">{roleDisplayNames[isEditing ? role : profile.role]}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -119,6 +127,29 @@ export function ProfileCard() {
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} readOnly={!isEditing} className="pl-10" />
                 </div>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="role">Rol</Label>
+                {isEditing && profile.role === 'admin' ? (
+                  <div className="relative">
+                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                      <Select value={role} onValueChange={(value) => setRole(value as Role)}>
+                        <SelectTrigger className="pl-10">
+                            <SelectValue placeholder="Seleccione un rol" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {ROLES.map((r) => (
+                                <SelectItem key={r} value={r}>{roleDisplayNames[r]}</SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                  </div>
+                ) : (
+                  <div className="relative">
+                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Input id="role" value={roleDisplayNames[profile.role]} readOnly className="pl-10 bg-muted/50" />
+                  </div>
+                )}
             </div>
         </div>
         
