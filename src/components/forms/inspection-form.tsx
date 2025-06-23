@@ -55,6 +55,89 @@ export function InspectionForm() {
     },
   });
 
+  const generatePdf = async (data: InspectionFormValues, reportId: string) => {
+    const { default: jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
+
+    const conditionMap: { [key: string]: string } = { good: 'Buena', fair: 'Regular', poor: 'Mala' };
+    const fluidMap: { [key: string]: string } = { ok: 'OK', low: 'Bajo / Necesita Relleno', na: 'N/A' };
+    const systemStatusMap: { [key: string]: string } = { 
+        ok: 'OK', 
+        adjustment_needed: 'Necesita Ajuste', 
+        repair_needed: 'Necesita Reparación',
+        leaking: 'Fugas',
+        faulty: 'Componente Defectuoso',
+    };
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('Reporte de Inspección', 105, 20, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`ID del Reporte: ${reportId}`, 20, 40);
+    doc.text(`Fecha de Inspección: ${format(data.date, 'PPP', { locale: es })}`, 20, 48);
+    
+    doc.line(20, 55, 190, 55);
+
+    let y = 65;
+
+    const addField = (label: string, value: string | boolean | undefined) => {
+        if (value !== undefined && value !== null && value !== '') {
+            if (y > 280) { // Add a new page if content overflows
+                doc.addPage();
+                y = 20;
+            }
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${label}:`, 20, y);
+            doc.setFont('helvetica', 'normal');
+            
+            const textValue = typeof value === 'boolean' ? (value ? 'Sí' : 'No') : String(value);
+            const splitText = doc.splitTextToSize(textValue, 110);
+            doc.text(splitText, 80, y);
+            y += (splitText.length * 5) + 5;
+        }
+    };
+    
+    addField('Nombre del Inspector', data.inspectorName);
+    addField('ID del Equipo', data.equipmentId);
+    addField('Ubicación', data.location);
+    
+    y += 5;
+    doc.line(20, y, 190, y);
+    y += 5;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resultados de la Inspección', 20, y);
+    y += 10;
+    
+    doc.setFont('helvetica', 'normal');
+    addField('Condición General', conditionMap[data.overallCondition]);
+    addField('Niveles de Fluido', fluidMap[data.fluidLevels]);
+    addField('Sistema de Frenos', systemStatusMap[data.brakeSystem]);
+    addField('Sistema Hidráulico', systemStatusMap[data.hydraulicSystem]);
+    addField('Sistema Eléctrico', systemStatusMap[data.electricalSystem]);
+    addField('Condición de Neumáticos', data.tireCondition);
+    if (data.attachmentsCondition) {
+        addField('Condición de Accesorios', data.attachmentsCondition);
+    }
+    
+    y += 5;
+    doc.line(20, y, 190, y);
+    y += 5;
+    
+    addField('Notas de Inspección', data.notes);
+    
+    y += 5;
+    doc.line(20, y, 190, y);
+    y += 5;
+
+    addField('Equipo de Seguridad OK', data.safetyEquipment);
+    addField('Inspección Aprobada', data.passedInspection);
+
+    doc.save(`reporte-inspeccion-${reportId}.pdf`);
+  };
+
   async function onSubmit(data: InspectionFormValues) {
     try {
       const serializableData = {
@@ -66,6 +149,9 @@ export function InspectionForm() {
         title: '¡Reporte de Inspección Enviado!',
         description: `Su reporte ha sido enviado con el ID: ${newReportId}.`,
       });
+      
+      await generatePdf(data, newReportId);
+
       form.reset();
     } catch (error) {
       console.error(error);
