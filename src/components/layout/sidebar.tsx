@@ -27,7 +27,8 @@ import {
   ShieldCheck,
   LifeBuoy,
   FlaskConical,
-  FileSignature
+  FileSignature,
+  FilePlus,
 } from 'lucide-react';
 
 export function AppSidebar() {
@@ -127,6 +128,14 @@ export function AppSidebar() {
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/rental-agreement')}>
                       <FileSignature />
                       Contrato de Alquiler
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/forms/general-report" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/general-report')}>
+                      <FilePlus />
+                      Reporte General
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
