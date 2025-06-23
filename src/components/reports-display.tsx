@@ -42,8 +42,113 @@ export function ReportsDisplay() {
   }, [fetchReports]);
 
   const renderDetails = (report: any) => {
+    const keyTranslations: { [key: string]: string } = {
+        // General & Common
+        reportName: 'Nombre del Reporte',
+        submittedBy: 'Enviado Por',
+        location: 'Ubicación',
+        details: 'Detalles',
+        createdAt: 'Fecha de Creación',
+        technicianName: 'Nombre del Técnico',
+        date: 'Fecha',
+        equipmentId: 'ID del Equipo',
+        clientName: 'Nombre del Cliente',
+        workPerformed: 'Trabajo Realizado',
+        notes: 'Notas',
+        status: 'Estado',
+        workOrderNumber: 'Número de Orden de Trabajo',
+        partsUsed: 'Repuestos Utilizados',
+
+        // Maintenance
+        hoursOnMachine: 'Horas en Máquina',
+        serviceType: 'Tipo de Servicio',
+        fluidCheck: 'Revisión de Fluidos',
+        tirePressure: 'Presión de Neumáticos',
+        nextServiceDate: 'Fecha Próximo Servicio',
+        safetyCheckPassed: 'Verificación de Seguridad Aprobada',
+
+        // Inspection
+        inspectorName: 'Nombre del Inspector',
+        overallCondition: 'Condición General',
+        fluidLevels: 'Niveles de Fluido',
+        brakeSystem: 'Sistema de Frenos',
+        hydraulicSystem: 'Sistema Hidráulico',
+        electricalSystem: 'Sistema Eléctrico',
+        tireCondition: 'Condición de Neumáticos',
+        attachmentsCondition: 'Condición de Accesorios',
+        safetyEquipment: 'Equipo de Seguridad OK',
+        passedInspection: 'Inspección Aprobada',
+
+        // Repair
+        laborHours: 'Horas de Trabajo',
+        symptoms: 'Síntomas Reportados',
+        problemDescription: 'Descripción del Problema / Trabajo',
+        diagnosticSteps: 'Pasos de Diagnóstico',
+        testingNotes: 'Notas de Pruebas',
+        finalStatus: 'Estado Final',
+        repairCompleted: 'Reparación Completada',
+        followUpRequired: 'Requiere Seguimiento',
+
+        // Work Order
+        reportedBy: 'Reportado Por',
+        issueDescription: 'Descripción del Problema',
+        assignedTechnician: 'Técnico Asignado',
+        priority: 'Prioridad',
+        estimatedHours: 'Horas Estimadas',
+        requiredParts: 'Repuestos Requeridos',
+
+        // Programmed Visit
+        scheduledDate: 'Fecha Programada',
+        contactPerson: 'Persona de Contacto',
+        contactPhone: 'Teléfono de Contacto',
+        visitPurpose: 'Propósito de la Visita',
+
+        // Warranty
+        customerName: 'Nombre del Cliente',
+        productModel: 'Modelo del Producto',
+        serialNumber: 'Número de Serie',
+        purchaseDate: 'Fecha de Compra',
+        failureDate: 'Fecha de Falla',
+        hoursAtFailure: 'Horas en Falla',
+        dealerName: 'Nombre del Distribuidor',
+        invoiceNumber: 'Número de Factura',
+        partNumberFailed: 'Nº de Parte Fallada',
+        partNumberReplaced: 'Nº de Parte Reemplazada',
+        claimType: 'Tipo de Reclamo',
+        claimStatus: 'Estado del Reclamo',
+        claimDescription: 'Descripción del Reclamo',
+        technicianNotes: 'Notas del Técnico',
+
+        // Safety
+        reportDate: 'Fecha del Reporte',
+        siteLocation: 'Ubicación del Sitio',
+        fireExtinguisherCheck: 'Revisión Extintor',
+        firstAidKitCheck: 'Revisión Botiquín',
+        emergencyStopCheck: 'Revisión Parada de Emergencia',
+        ppeComplianceNotes: 'Notas de EPP',
+        overallSafetyRating: 'Calificación de Seguridad',
+
+        // Fluid Analysis
+        sampleDate: 'Fecha de Muestra',
+        fluidType: 'Tipo de Fluido',
+        sampleId: 'ID de Muestra',
+        viscosityLevel: 'Nivel de Viscosidad',
+        contaminationLevel: 'Nivel de Contaminación',
+        analysisSummary: 'Resumen de Análisis',
+        actionRequired: 'Acción Requerida',
+        
+        // Rental Agreement
+        rentalStartDate: 'Inicio de Alquiler',
+        rentalEndDate: 'Fin de Alquiler',
+        dailyRate: 'Tarifa Diaria ($)',
+        insuranceProvider: 'Proveedor de Seguros',
+        deliveryAddress: 'Dirección de Entrega',
+        operatorName: 'Nombre del Operador',
+        termsAccepted: 'Términos Aceptados'
+      };
+
     return Object.entries(report).map(([key, value]) => {
-      if (key === 'id' || key === 'formType') return null;
+      if (key === 'id' || key === 'formType' || value === '' || value === null) return null;
       
       let displayValue = String(value);
       
@@ -56,13 +161,12 @@ export function ReportsDisplay() {
         displayValue = value ? 'Sí' : 'No';
       }
 
-      // Prettify camelCase keys
-      const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+      const displayKey = keyTranslations[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 
       return (
-        <div key={key} className="grid grid-cols-3 gap-2 py-2 border-b last:border-b-0">
-          <p className="font-semibold capitalize col-span-1">{displayKey}</p>
-          <p className="col-span-2 text-muted-foreground break-words">{displayValue}</p>
+        <div key={key} className="grid grid-cols-2 gap-4 py-2 border-b last:border-b-0">
+          <p className="font-semibold">{displayKey}</p>
+          <p className="text-muted-foreground break-words justify-self-end text-right">{displayValue}</p>
         </div>
       );
     });
@@ -95,7 +199,7 @@ export function ReportsDisplay() {
                 <TableHead>ID de Reporte</TableHead>
                 <TableHead>Tipo de Formulario</TableHead>
                 <TableHead className="hidden sm:table-cell">Fecha de Creación</TableHead>
-                <TableHead>Acciones</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -107,7 +211,7 @@ export function ReportsDisplay() {
                     <TableCell className="hidden sm:table-cell">
                       {format(new Date(report.createdAt), 'PPP p', { locale: es })}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right">
                        <Dialog>
                         <DialogTrigger asChild>
                            <Button variant="outline" size="sm">Ver Detalles</Button>
