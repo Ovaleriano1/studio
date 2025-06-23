@@ -19,6 +19,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { saveMaintenanceReport } from '@/app/actions';
 
 const maintenanceFormSchema = z.object({
   technicianName: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
@@ -56,19 +57,21 @@ export function MaintenanceForm() {
   });
 
   async function onSubmit(data: MaintenanceFormValues) {
-    console.log(data);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast({
-      title: '¡Formulario Enviado!',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    form.reset();
+    try {
+      await saveMaintenanceReport(data);
+      toast({
+        title: '¡Reporte Guardado!',
+        description: 'Su reporte de mantenimiento ha sido guardado en la base de datos.',
+      });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error al Guardar',
+        description: 'No se pudo guardar el reporte. Por favor, inténtelo de nuevo más tarde.',
+      });
+    }
   }
 
   return (
