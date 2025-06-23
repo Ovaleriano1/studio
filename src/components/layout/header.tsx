@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeft, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -10,11 +9,25 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useUserProfile } from '@/context/user-profile-context';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
 
 export function AppHeader({ title }: { title: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const isDashboard = pathname === '/';
+  const { logout } = useUserProfile();
+
+  const handleLogout = async () => {
+    try {
+        await signOut(auth);
+        logout();
+        router.push('/login');
+    } catch (error) {
+        console.error("Error signing out: ", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:h-16 sm:px-6">
@@ -41,12 +54,10 @@ export function AppHeader({ title }: { title: string }) {
       <div className="flex items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Link href="/login" passHref>
-              <Button variant="ghost" size="icon">
-                <LogOut className="h-5 w-5" />
-                <span className="sr-only">Cerrar sesión</span>
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Cerrar sesión</span>
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>Cerrar sesión</p>

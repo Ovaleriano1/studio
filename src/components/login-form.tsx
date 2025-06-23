@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
+import { useUserProfile } from '@/context/user-profile-context';
 
 const WhatsAppIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-5 h-5 text-white">
@@ -22,6 +23,7 @@ export function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
+    const { login } = useUserProfile();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -38,7 +40,10 @@ export function LoginForm() {
         }
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            if (userCredential.user.email) {
+                login(userCredential.user.email);
+            }
             toast({
               title: '¡Bienvenido de vuelta!',
               description: 'Has iniciado sesión correctamente.',
