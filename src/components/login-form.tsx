@@ -45,7 +45,6 @@ export function LoginForm() {
             });
             router.push('/');
         } catch (error: any) {
-            console.error("Firebase Auth Error:", error);
             let errorMessage = 'Ocurrió un error al iniciar sesión. Por favor, inténtelo de nuevo.';
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 errorMessage = 'Credenciales incorrectas. Por favor, verifique su correo y contraseña.';
