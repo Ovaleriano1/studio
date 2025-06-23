@@ -67,16 +67,16 @@ export function MaintenanceForm() {
 
       await saveMaintenanceReport(serializableData);
       toast({
-        title: '¡Reporte Guardado!',
-        description: 'Su reporte de mantenimiento ha sido guardado en la base de datos.',
+        title: '¡Reporte Enviado!',
+        description: 'Su reporte de mantenimiento ha sido enviado exitosamente.',
       });
       form.reset();
     } catch (error) {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Error al Guardar',
-        description: 'No se pudo guardar el reporte. Por favor, inténtelo de nuevo más tarde.',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar el reporte. Por favor, inténtelo de nuevo más tarde.',
       });
     }
   }

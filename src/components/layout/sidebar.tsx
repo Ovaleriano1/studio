@@ -29,6 +29,7 @@ import {
   FlaskConical,
   FileSignature,
   FilePlus,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export function AppSidebar() {
@@ -51,6 +52,14 @@ export function AppSidebar() {
               <SidebarMenuButton isActive={pathname === '/'}>
                 <Home />
                 Dashboard
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <Link href="/reports" passHref>
+              <SidebarMenuButton isActive={pathname === '/reports'}>
+                <FileSpreadsheet />
+                Reportes
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>

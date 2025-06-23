@@ -38,16 +38,16 @@ export function GeneralReportForm() {
     try {
       const newReportId = await saveGeneralReport(data);
       toast({
-        title: '¡Reporte Guardado!',
-        description: `Su reporte general ha sido guardado con el ID: ${newReportId}.`,
+        title: '¡Reporte Enviado!',
+        description: `Su reporte general ha sido enviado con el ID: ${newReportId}.`,
       });
       form.reset();
     } catch (error) {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Error al Guardar',
-        description: 'No se pudo guardar el reporte. Por favor, inténtelo de nuevo más tarde.',
+        title: 'Error al Enviar',
+        description: 'No se pudo enviar el reporte. Por favor, inténtelo de nuevo más tarde.',
       });
     }
   }
