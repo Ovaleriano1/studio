@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { suggestRelevantForm, type SuggestRelevantFormInput, type SuggestRelevantFormOutput } from '@/ai/flows/suggest-relevant-form';
 
 // In-memory store for reports as a temporary workaround for DB connection issues.
 // NOTE: This data will reset every time the server restarts.
@@ -161,16 +160,6 @@ let reports: any[] = [
         createdAt: new Date('2024-07-21T15:00:00Z').toISOString(),
     }
 ];
-
-export async function getFormSuggestion(input: SuggestRelevantFormInput): Promise<SuggestRelevantFormOutput> {
-  try {
-    const result = await suggestRelevantForm(input);
-    return result;
-  } catch (error) {
-    console.error('Error in getFormSuggestion server action:', error);
-    throw new Error('Failed to process the form suggestion.');
-  }
-}
 
 /**
  * Fetches all reports from the in-memory store.
