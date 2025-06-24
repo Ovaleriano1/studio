@@ -34,6 +34,7 @@ export function GeneralReportForm() {
     },
   });
 
+  /*
   const generatePdf = async (data: GeneralReportValues, reportId: string) => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
@@ -79,6 +80,7 @@ export function GeneralReportForm() {
 
     doc.save(`reporte-general-${reportId}.pdf`);
   };
+  */
 
   async function onSubmit(data: GeneralReportValues) {
     try {
@@ -88,7 +90,7 @@ export function GeneralReportForm() {
         description: `Su reporte general ha sido enviado con el ID: ${newReportId}.`,
       });
       
-      await generatePdf(data, newReportId);
+      // await generatePdf(data, newReportId);
 
       form.reset();
     } catch (error) {

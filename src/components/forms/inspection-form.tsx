@@ -55,6 +55,7 @@ export function InspectionForm() {
     },
   });
 
+  /*
   const generatePdf = async (data: InspectionFormValues, reportId: string) => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
@@ -137,6 +138,7 @@ export function InspectionForm() {
 
     doc.save(`reporte-inspeccion-${reportId}.pdf`);
   };
+  */
 
   async function onSubmit(data: InspectionFormValues) {
     try {
@@ -150,7 +152,7 @@ export function InspectionForm() {
         description: `Su reporte ha sido enviado con el ID: ${newReportId}.`,
       });
       
-      await generatePdf(data, newReportId);
+      // await generatePdf(data, newReportId);
 
       form.reset();
     } catch (error) {

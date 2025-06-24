@@ -56,6 +56,7 @@ export function MaintenanceForm() {
     },
   });
 
+  /*
   const generatePdf = async (data: MaintenanceFormValues, reportId: string) => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
@@ -121,6 +122,7 @@ export function MaintenanceForm() {
 
     doc.save(`reporte-mantenimiento-${reportId}.pdf`);
   };
+  */
 
   async function onSubmit(data: MaintenanceFormValues) {
     try {
@@ -136,7 +138,7 @@ export function MaintenanceForm() {
         description: `Su reporte de mantenimiento ha sido enviado con el ID: ${newReportId}.`,
       });
       
-      await generatePdf(data, newReportId);
+      // await generatePdf(data, newReportId);
 
       form.reset();
     } catch (error) {
