@@ -33,6 +33,7 @@ const prompt = ai.definePrompt({
   name: 'suggestRelevantFormPrompt',
   input: {schema: SuggestRelevantFormInputSchema},
   output: {schema: SuggestRelevantFormOutputSchema},
+  model: 'googleai/gemini-2.0-flash',
   prompt: `You are an AI assistant that suggests the most relevant form for a technician to fill out based on their location and the equipment model they are working on. You must always suggest only one form and the reasoning behind the suggestion.
 
 Location: {{{location}}}
