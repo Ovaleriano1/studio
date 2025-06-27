@@ -4,17 +4,19 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { getReports, updateReport } from '@/app/actions';
+import { getReports, updateReport, deleteReport } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from './ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { ScrollArea } from './ui/scroll-area';
-import { RefreshCw, Edit } from 'lucide-react';
+import { RefreshCw, Edit, Trash2 } from 'lucide-react';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import { useUserProfile } from '@/context/user-profile-context';
 
 export function ReportsDisplay() {
   const [reports, setReports] = useState<any[]>([]);
@@ -26,6 +28,11 @@ export function ReportsDisplay() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<any | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { profile } = useUserProfile();
+  const canEdit = profile.role === 'admin' || profile.role === 'superuser' || profile.role === 'supervisor';
+  const canDelete = profile.role === 'admin' || profile.role === 'superuser';
 
   const fetchReports = useCallback(async () => {
     try {
@@ -84,6 +91,29 @@ export function ReportsDisplay() {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!selectedReport) return;
+    setIsDeleting(true);
+    try {
+      await deleteReport(selectedReport.id);
+      toast({
+        title: '¡Éxito!',
+        description: `El reporte ${selectedReport.id} ha sido eliminado.`,
+      });
+      setIsDialogOpen(false); // Close the main dialog
+      fetchReports(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'No se pudo eliminar el reporte.',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -307,7 +337,7 @@ export function ReportsDisplay() {
                 </div>
               </ScrollArea>
               <DialogFooter>
-                 {isEditing ? (
+                {isEditing ? (
                   <div className="flex w-full justify-end gap-2">
                     <Button type="button" variant="ghost" onClick={handleCancelEdit}>Cancelar</Button>
                     <Button type="button" onClick={handleSave} disabled={isSaving}>
@@ -317,10 +347,43 @@ export function ReportsDisplay() {
                   </div>
                 ) : (
                   <div className="flex w-full justify-between items-center">
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Editar
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {canEdit && (
+                        <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </Button>
+                      )}
+                      {canDelete && (
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Eliminar
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>¿Está absolutamente seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta acción no se puede deshacer. Esto eliminará permanentemente el reporte de los datos temporales.
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
+                                    {isDeleting ? (
+                                        <>
+                                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                            Eliminando...
+                                        </>
+                                    ) : 'Continuar'}
+                                </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                     <DialogClose asChild>
                       <Button type="button" variant="secondary">Cerrar</Button>
                     </DialogClose>

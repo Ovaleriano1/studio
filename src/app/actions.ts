@@ -188,6 +188,23 @@ export async function updateReport(updatedReportData: any) {
   }
 }
 
+export async function deleteReport(reportId: string): Promise<{ success: boolean }> {
+  try {
+    const reportIndex = reports.findIndex(r => r.id === reportId);
+    if (reportIndex === -1) {
+      throw new Error('Reporte no encontrado.');
+    }
+    // Remove the report from the array
+    reports.splice(reportIndex, 1);
+    console.log(`Report ${reportId} deleted from in-memory store.`);
+    revalidatePath('/reports');
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting report in in-memory store:', error);
+    throw new Error('No se pudo eliminar el reporte. Por favor, inténtelo de nuevo.');
+  }
+}
+
 
 export async function saveMaintenanceReport(reportData: any): Promise<string> {
   try {
