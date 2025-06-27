@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -18,9 +18,10 @@ interface ProgrammedVisit {
 
 interface TechnicianCalendarProps {
     initialAppointments: ProgrammedVisit[];
+    initialDate?: Date;
 }
 
-export function TechnicianCalendar({ initialAppointments = [] }: TechnicianCalendarProps) {
+export function TechnicianCalendar({ initialAppointments = [], initialDate }: TechnicianCalendarProps) {
     // Data is passed as a prop from a Server Component.
     // It might be serialized, so we ensure scheduledDate is a Date object.
     const appointments = useMemo(() => 
@@ -28,7 +29,16 @@ export function TechnicianCalendar({ initialAppointments = [] }: TechnicianCalen
         [initialAppointments]
     );
 
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+        // initialDate is also serialized when passed from a Server Component.
+        if (initialDate) {
+            const date = new Date(initialDate);
+            if (isValid(date)) {
+                return date;
+            }
+        }
+        return new Date();
+    });
 
     const appointmentDates = useMemo(() => appointments.map(app => app.scheduledDate), [appointments]);
 
