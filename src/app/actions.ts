@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -216,7 +217,7 @@ export async function saveMaintenanceReport(reportData: any): Promise<string> {
   try {
     const newReport = {
       ...reportData,
-      id: `MR-${String(Date.now()).slice(-6)}`, // Simple unique ID
+      id: `MR-${Date.now()}`, // Simple unique ID
       formType: 'Reporte de Mantenimiento',
       createdAt: new Date().toISOString(),
     };
@@ -232,7 +233,7 @@ export async function saveMaintenanceReport(reportData: any): Promise<string> {
 
 export async function saveGeneralReport(reportData: any): Promise<string> {
   try {
-    const newId = `GR-${String(Date.now()).slice(-6)}`; // Simple unique ID
+    const newId = `GR-${Date.now()}`; // Simple unique ID
     const newReport = {
       ...reportData,
       id: newId,
@@ -251,7 +252,7 @@ export async function saveGeneralReport(reportData: any): Promise<string> {
 
 export async function saveInspectionReport(reportData: any): Promise<string> {
     try {
-        const newId = `INSP-${String(Date.now()).slice(-6)}`;
+        const newId = `INSP-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -270,7 +271,7 @@ export async function saveInspectionReport(reportData: any): Promise<string> {
 
 export async function saveRepairReport(reportData: any): Promise<string> {
     try {
-        const newId = `REP-${String(Date.now()).slice(-6)}`;
+        const newId = `REP-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -289,7 +290,7 @@ export async function saveRepairReport(reportData: any): Promise<string> {
 
 export async function saveWorkOrder(reportData: any): Promise<string> {
     try {
-        const newId = `OT-${String(Date.now()).slice(-6)}`;
+        const newId = `OT-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -308,7 +309,7 @@ export async function saveWorkOrder(reportData: any): Promise<string> {
 
 export async function saveProgrammedVisit(reportData: any): Promise<string> {
     try {
-        const newId = `PV-${String(Date.now()).slice(-6)}`;
+        const newId = `PV-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -328,7 +329,7 @@ export async function saveProgrammedVisit(reportData: any): Promise<string> {
 
 export async function saveWarrantyClaim(reportData: any): Promise<string> {
     try {
-        const newId = `WAR-${String(Date.now()).slice(-6)}`;
+        const newId = `WAR-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -347,7 +348,7 @@ export async function saveWarrantyClaim(reportData: any): Promise<string> {
 
 export async function saveSafetyReport(reportData: any): Promise<string> {
     try {
-        const newId = `SAFE-${String(Date.now()).slice(-6)}`;
+        const newId = `SAFE-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -366,7 +367,7 @@ export async function saveSafetyReport(reportData: any): Promise<string> {
 
 export async function saveFluidAnalysis(reportData: any): Promise<string> {
     try {
-        const newId = `FLUID-${String(Date.now()).slice(-6)}`;
+        const newId = `FLUID-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
@@ -385,7 +386,7 @@ export async function saveFluidAnalysis(reportData: any): Promise<string> {
 
 export async function saveRentalAgreement(reportData: any): Promise<string> {
     try {
-        const newId = `RENT-${String(Date.now()).slice(-6)}`;
+        const newId = `RENT-${Date.now()}`;
         const newReport = {
             ...reportData,
             id: newId,
