@@ -47,7 +47,7 @@ const users: Record<string, UserProfile> = {
 };
 
 
-const defaultProfile: UserProfile = users['jfunez@camosa.com']; // Default to a technician
+const defaultProfile: UserProfile = users['ohernandez@camosa.com']; // Default to an admin
 
 interface UserProfileContextType {
   profile: UserProfile;
