@@ -60,7 +60,6 @@ export function ProgrammedVisitForm() {
         description: `La visita ha sido programada con el ID: ${newReportId}.`,
       });
       form.reset();
-      router.push(`/calendar?date=${data.scheduledDate.toISOString()}`);
     } catch (error) {
       console.error(error);
       toast({
