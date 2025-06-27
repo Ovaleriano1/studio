@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // Define the available roles
 export const ROLES = ['admin', 'superuser', 'supervisor', 'user-technicians'] as const;
@@ -14,8 +14,8 @@ interface UserProfile {
   role: Role;
 }
 
-// In-memory user data store
-const users: Record<string, UserProfile> = {
+// In-memory user data store - this is now a fallback/default
+const defaultUsers: Record<string, UserProfile> = {
   'ohernandez@camosa.com': {
     name: 'Oscar Hernandez',
     email: 'ohernandez@camosa.com',
@@ -46,8 +46,7 @@ const users: Record<string, UserProfile> = {
   },
 };
 
-
-const defaultProfile: UserProfile = users['ohernandez@camosa.com']; // Default to an admin
+const defaultAdminProfile: UserProfile = defaultUsers['ohernandez@camosa.com']; // Default to an admin
 
 interface UserProfileContextType {
   profile: UserProfile;
@@ -59,24 +58,82 @@ interface UserProfileContextType {
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
 
 export function UserProfileProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+  const [profile, setProfile] = useState<UserProfile>(defaultAdminProfile);
+  const [users, setUsers] = useState<Record<string, UserProfile>>(defaultUsers);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    // This effect runs once on the client to load data from localStorage
+    try {
+      const storedUsers = localStorage.getItem('camosaUserProfiles');
+      const storedUserEmail = localStorage.getItem('camosaCurrentUserEmail');
+      let loadedUsers = defaultUsers;
+
+      if (storedUsers) {
+        loadedUsers = JSON.parse(storedUsers);
+        setUsers(loadedUsers);
+      } else {
+        // If nothing in storage, store the default users
+        localStorage.setItem('camosaUserProfiles', JSON.stringify(defaultUsers));
+      }
+      
+      // If there was a user logged in, restore their session
+      if (storedUserEmail && loadedUsers[storedUserEmail]) {
+        setProfile(loadedUsers[storedUserEmail]);
+      } else {
+        // Otherwise, default to admin
+        setProfile(loadedUsers['ohernandez@camosa.com']);
+      }
+
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
+      // Fallback to default users if localStorage fails
+      setUsers(defaultUsers);
+      setProfile(defaultAdminProfile);
+    }
+    setIsInitialized(true);
+  }, []);
 
   const login = (email: string) => {
-    const userProfile = users[email] || defaultProfile;
+    const userProfile = users[email] || defaultAdminProfile;
     setProfile(userProfile);
+    try {
+      localStorage.setItem('camosaCurrentUserEmail', email);
+    } catch (error) {
+      console.error("Failed to set current user in localStorage:", error);
+    }
   };
   
   const logout = () => {
-    setProfile(defaultProfile);
+    setProfile(users['ohernandez@camosa.com']); // Default to admin on logout
+    try {
+        localStorage.removeItem('camosaCurrentUserEmail');
+    } catch (error) {
+        console.error("Failed to remove current user from localStorage:", error);
+    }
   };
 
   const updateProfile = (newProfileData: Partial<UserProfile>) => {
-    // Also update the in-memory store for persistence across logins in this session
-    if (users[profile.email]) {
-        users[profile.email] = { ...users[profile.email], ...newProfileData };
+    const userEmailToUpdate = profile.email;
+    if (users[userEmailToUpdate]) {
+      const updatedProfile = { ...users[userEmailToUpdate], ...newProfileData };
+      const updatedUsers = { ...users, [userEmailToUpdate]: updatedProfile };
+      
+      setUsers(updatedUsers);
+      setProfile(updatedProfile);
+
+      try {
+        localStorage.setItem('camosaUserProfiles', JSON.stringify(updatedUsers));
+      } catch (error) {
+        console.error("Failed to save updated profiles to localStorage:", error);
+      }
     }
-    setProfile(prevProfile => ({ ...prevProfile, ...newProfileData }));
   };
+  
+  // Render nothing until we've initialized from localStorage to avoid hydration mismatch
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <UserProfileContext.Provider value={{ profile, updateProfile, login, logout }}>
