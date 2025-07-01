@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -166,7 +167,7 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuItem>
               </SidebarMenu>
-              {profile.role !== 'user-technicians' && (
+              {['admin', 'supervisor'].includes(profile.role) && (
                  <div className="pt-2">
                     <button
                         className="flex items-center justify-between w-full h-8 px-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/70"
