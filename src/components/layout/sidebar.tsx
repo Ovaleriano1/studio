@@ -3,6 +3,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   SidebarContent,
   SidebarMenu,
@@ -22,7 +23,6 @@ import {
   ClipboardList,
   FileText,
   Settings,
-  HardHat,
   Hammer,
   CalendarCheck,
   ShieldCheck,
@@ -51,9 +51,9 @@ export function AppSidebar() {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-3 p-2">
-          <HardHat className="size-8 text-sidebar-primary" />
+          <Image src="/LOGOCamosaCC.png" alt="CAMOSA Logo" width={32} height={32} />
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold text-sidebar-primary font-headline">CamosaApp Tecnicos</h1>
+            <h1 className="text-lg font-bold text-sidebar-primary font-headline">CAMOSA App Tecnicos</h1>
           </div>
         </div>
       </SidebarHeader>
