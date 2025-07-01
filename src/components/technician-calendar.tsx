@@ -9,6 +9,11 @@ import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import type { VariantProps } from 'class-variance-authority';
 import { badgeVariants } from './ui/badge';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from './ui/dialog';
+import { ProgrammedVisitForm } from '@/components/forms/programmed-visit-form';
+import { PlusCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // A generic event structure for the calendar
 export interface CalendarEvent {
@@ -28,12 +33,14 @@ interface TechnicianCalendarProps {
 }
 
 export function TechnicianCalendar({ events: rawEvents = [] }: TechnicianCalendarProps) {
+    const router = useRouter();
     const events: ProcessedCalendarEvent[] = useMemo(() => 
         rawEvents.map(e => ({...e, date: parseISO(e.date)})), 
         [rawEvents]
     );
 
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const eventDates = useMemo(() => events.map(event => event.date), [events]);
 
@@ -67,6 +74,11 @@ export function TechnicianCalendar({ events: rawEvents = [] }: TechnicianCalenda
         }
     }
 
+    const handleSuccess = () => {
+        setIsDialogOpen(false);
+        router.refresh();
+    };
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="md:col-span-1 lg:col-span-1 flex justify-center items-start">
@@ -86,15 +98,37 @@ export function TechnicianCalendar({ events: rawEvents = [] }: TechnicianCalenda
             </Card>
 
             <Card className="md:col-span-1 lg:col-span-2">
-                <CardHeader>
-                    <CardTitle>
-                        Eventos para {selectedDate ? format(selectedDate, 'PPP', { locale: es }) : 'el día seleccionado'}
-                    </CardTitle>
-                    <CardDescription>
-                        {selectedDayEvents.length > 0 
-                            ? `Usted tiene ${selectedDayEvents.length} evento(s) programado(s).` 
-                            : 'No hay eventos programados para este día.'}
-                    </CardDescription>
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <div>
+                        <CardTitle>
+                            Eventos para {selectedDate ? format(selectedDate, 'PPP', { locale: es }) : 'el día seleccionado'}
+                        </CardTitle>
+                        <CardDescription>
+                            {selectedDayEvents.length > 0 
+                                ? `Usted tiene ${selectedDayEvents.length} evento(s) programado(s).` 
+                                : 'No hay eventos programados para este día.'}
+                        </CardDescription>
+                    </div>
+                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                           <Button>
+                               <PlusCircle className="mr-2 h-4 w-4" />
+                               Programar Visita
+                           </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[800px]">
+                            <DialogHeader>
+                               <DialogTitle>Programar Nueva Visita</DialogTitle>
+                               <DialogDescription>
+                                   Complete el formulario para agregar un nuevo evento al calendario. La fecha seleccionada será utilizada.
+                               </DialogDescription>
+                            </DialogHeader>
+                            <ProgrammedVisitForm 
+                                defaultDate={selectedDate}
+                                onSuccess={handleSuccess} 
+                            />
+                        </DialogContent>
+                    </Dialog>
                 </CardHeader>
                 <CardContent>
                     <ScrollArea className="h-[400px]">

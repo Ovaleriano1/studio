@@ -7,6 +7,7 @@ import { CalendarDays, Loader2, CalendarCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,9 +33,13 @@ const programmedVisitSchema = z.object({
 
 type ProgrammedVisitValues = z.infer<typeof programmedVisitSchema>;
 
-export function ProgrammedVisitForm() {
+interface ProgrammedVisitFormProps {
+  defaultDate?: Date;
+  onSuccess?: () => void;
+}
+
+export function ProgrammedVisitForm({ defaultDate, onSuccess }: ProgrammedVisitFormProps) {
   const { toast } = useToast();
-  const router = useRouter();
   const form = useForm<ProgrammedVisitValues>({
     resolver: zodResolver(programmedVisitSchema),
     defaultValues: {
@@ -45,8 +50,15 @@ export function ProgrammedVisitForm() {
       equipmentId: '',
       contactPerson: '',
       contactPhone: '',
+      scheduledDate: defaultDate,
     },
   });
+
+  useEffect(() => {
+    if (defaultDate) {
+      form.setValue('scheduledDate', defaultDate, { shouldValidate: true });
+    }
+  }, [defaultDate, form]);
 
   async function onSubmit(data: ProgrammedVisitValues) {
     try {
@@ -60,6 +72,9 @@ export function ProgrammedVisitForm() {
         description: `La visita ha sido programada con el ID: ${newReportId}.`,
       });
       form.reset();
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error(error);
       toast({
@@ -71,15 +86,15 @@ export function ProgrammedVisitForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-none">
+      <CardHeader className="p-0 mb-6">
         <div className="flex items-center gap-2">
           <CalendarCheck className="w-6 h-6 text-primary" />
           <CardTitle>Visita Programada</CardTitle>
         </div>
         <CardDescription>Programe una nueva visita para un cliente.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid md:grid-cols-2 gap-8">
