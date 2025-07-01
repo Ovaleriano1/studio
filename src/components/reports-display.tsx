@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { es } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from './ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { ScrollArea } from './ui/scroll-area';
-import { RefreshCw, Edit, Trash2 } from 'lucide-react';
+import { RefreshCw, Edit, Trash2, AreaChart } from 'lucide-react';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -232,10 +233,20 @@ export function ReportsDisplay() {
               <CardTitle>Reportes Enviados</CardTitle>
               <CardDescription>Una lista de todos los formularios que han sido enviados. Los datos son temporales.</CardDescription>
           </div>
-          <Button variant="outline" size="icon" onClick={fetchReports} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="sr-only">Actualizar Reportes</span>
-          </Button>
+           <div className="flex items-center gap-2">
+            {profile.role === 'supervisor' && (
+              <Link href="/analytics" passHref>
+                <Button variant="outline">
+                  <AreaChart className="mr-2 h-4 w-4" />
+                  Analíticas
+                </Button>
+              </Link>
+            )}
+            <Button variant="outline" size="icon" onClick={fetchReports} disabled={isLoading}>
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="sr-only">Actualizar Reportes</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
