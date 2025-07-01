@@ -5,7 +5,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Badge, badgeVariants } from '@/components/ui/badge';
+import type { VariantProps } from 'class-variance-authority';
 import { Button } from '@/components/ui/button';
 import { getReports, updateReport } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -60,6 +61,17 @@ export function StatusDashboard() {
     }
   };
 
+  const getStatusBadgeVariant = (status: string): VariantProps<typeof badgeVariants>['variant'] => {
+    switch (status) {
+      case 'Completado':
+        return 'default';
+      case 'Cancelado':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -91,51 +103,54 @@ export function StatusDashboard() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {reports.map((report) => (
+                    {reports.map((report) => {
+                      const isLocked = ['Completado', 'Cancelado'].includes(report.status);
+                      return (
                         <TableRow key={report.id}>
-                        <TableCell className="font-medium">{report.id}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{report.formType}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                            {format(new Date(report.createdAt), 'PPP', { locale: es })}
-                        </TableCell>
-                        <TableCell>
-                            {canManageStatus ? (
-                            report.status === 'Completado' ? (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div className="flex items-center gap-2 cursor-help">
-                                            <Badge variant="default">{report.status}</Badge>
-                                            <Lock className="h-4 w-4 text-muted-foreground" />
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Este reporte está bloqueado y no se puede modificar.</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            ) : (
-                                <Select
-                                value={report.status}
-                                onValueChange={(newStatus) => handleStatusChange(report, newStatus)}
-                                disabled={isUpdating === report.id}
-                                >
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Seleccionar estado" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {STATUS_OPTIONS.map((status) => (
-                                    <SelectItem key={status} value={status}>
-                                        {status}
-                                    </SelectItem>
-                                    ))}
-                                </SelectContent>
-                                </Select>
-                            )
-                            ) : (
-                            <Badge variant={report.status === 'Completado' ? 'default' : 'secondary'}>{report.status}</Badge>
-                            )}
-                        </TableCell>
+                          <TableCell className="font-medium">{report.id}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{report.formType}</TableCell>
+                          <TableCell className="hidden md:table-cell">
+                              {format(new Date(report.createdAt), 'PPP', { locale: es })}
+                          </TableCell>
+                          <TableCell>
+                              {canManageStatus ? (
+                              isLocked ? (
+                                  <Tooltip>
+                                      <TooltipTrigger asChild>
+                                          <div className="flex items-center gap-2 cursor-help">
+                                              <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+                                              <Lock className="h-4 w-4 text-muted-foreground" />
+                                          </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                          <p>Este reporte está bloqueado y no se puede modificar.</p>
+                                      </TooltipContent>
+                                  </Tooltip>
+                              ) : (
+                                  <Select
+                                  value={report.status}
+                                  onValueChange={(newStatus) => handleStatusChange(report, newStatus)}
+                                  disabled={isUpdating === report.id}
+                                  >
+                                  <SelectTrigger className="w-[180px]">
+                                      <SelectValue placeholder="Seleccionar estado" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {STATUS_OPTIONS.map((status) => (
+                                      <SelectItem key={status} value={status}>
+                                          {status}
+                                      </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                                  </Select>
+                              )
+                              ) : (
+                                <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+                              )}
+                          </TableCell>
                         </TableRow>
-                    ))}
+                      );
+                    })}
                     </TableBody>
                 </Table>
             </TooltipProvider>

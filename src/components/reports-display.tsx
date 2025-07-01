@@ -108,11 +108,11 @@ export function ReportsDisplay() {
       setIsDialogOpen(false); // Close the main dialog
       fetchReports(); // Refresh the list
     } catch (error) {
-      console.error('Error deleting report:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error.';
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'No se pudo eliminar el reporte.',
+        description: errorMessage,
       });
     } finally {
       setIsDeleting(false);
@@ -222,7 +222,7 @@ export function ReportsDisplay() {
     return String(value);
   }
 
-  const isCompleted = selectedReport?.status === 'Completado';
+  const isLocked = ['Completado', 'Cancelado'].includes(selectedReport?.status);
 
   return (
     <>
@@ -356,12 +356,12 @@ export function ReportsDisplay() {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                <span tabIndex={isCompleted ? 0 : -1} className={isCompleted ? 'cursor-not-allowed' : ''}>
+                                <span tabIndex={isLocked ? 0 : -1} className={isLocked ? 'cursor-not-allowed' : ''}>
                                     <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => setIsEditing(true)}
-                                    disabled={isCompleted}
+                                    disabled={isLocked}
                                     className="w-full"
                                     >
                                     <Edit className="mr-2 h-4 w-4" />
@@ -369,9 +369,9 @@ export function ReportsDisplay() {
                                     </Button>
                                 </span>
                                 </TooltipTrigger>
-                                {isCompleted && (
+                                {isLocked && (
                                 <TooltipContent>
-                                    <p>Los reportes completados no se pueden editar.</p>
+                                    <p>Los reportes completados o cancelados no se pueden editar.</p>
                                 </TooltipContent>
                                 )}
                             </Tooltip>
@@ -381,10 +381,10 @@ export function ReportsDisplay() {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                <span tabIndex={isCompleted ? 0 : -1} className={isCompleted ? 'cursor-not-allowed' : ''}>
+                                <span tabIndex={isLocked ? 0 : -1} className={isLocked ? 'cursor-not-allowed' : ''}>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" disabled={isCompleted}>
+                                            <Button variant="destructive" disabled={isLocked}>
                                                 <Trash2 className="mr-2 h-4 w-4" />
                                                 Eliminar
                                             </Button>
@@ -411,9 +411,9 @@ export function ReportsDisplay() {
                                     </AlertDialog>
                                 </span>
                                 </TooltipTrigger>
-                                {isCompleted && (
+                                {isLocked && (
                                 <TooltipContent>
-                                    <p>Los reportes completados no se pueden eliminar.</p>
+                                    <p>Los reportes completados o cancelados no se pueden eliminar.</p>
                                 </TooltipContent>
                                 )}
                             </Tooltip>

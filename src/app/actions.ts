@@ -193,9 +193,9 @@ export async function updateReport(updatedReportData: any) {
     if (reportIndex === -1) {
       throw new Error('Reporte no encontrado.');
     }
-    // Lock completed reports from being edited
-    if (reports[reportIndex].status === 'Completado') {
-        throw new Error('No se puede modificar un reporte que ya ha sido completado.');
+    // Lock completed or cancelled reports from being edited
+    if (['Completado', 'Cancelado'].includes(reports[reportIndex].status)) {
+        throw new Error('No se puede modificar un reporte que ya ha sido completado o cancelado.');
     }
     // Update the report in the array
     reports[reportIndex] = { ...updatedReportData };
@@ -216,6 +216,10 @@ export async function deleteReport(reportId: string): Promise<{ success: boolean
     const reportIndex = reports.findIndex(r => r.id === reportId);
     if (reportIndex === -1) {
       throw new Error('Reporte no encontrado.');
+    }
+    // Lock completed or cancelled reports from being deleted
+    if (['Completado', 'Cancelado'].includes(reports[reportIndex].status)) {
+        throw new Error('No se puede eliminar un reporte que ya ha sido completado o cancelado.');
     }
     // Remove the report from the array
     reports.splice(reportIndex, 1);
