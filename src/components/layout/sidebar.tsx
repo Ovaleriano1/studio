@@ -99,16 +99,14 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuItem>
           )}
-          {profile.role !== 'supervisor' && (
-            <SidebarMenuItem>
-              <Link href="/calendar" passHref>
-                <SidebarMenuButton isActive={pathname.startsWith('/calendar')}>
-                  <Calendar />
-                  Calendario
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          )}
+          <SidebarMenuItem>
+            <Link href="/calendar" passHref>
+              <SidebarMenuButton isActive={pathname.startsWith('/calendar')}>
+                <Calendar />
+                Calendario
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
         </SidebarMenu>
         <SidebarGroup>
           <SidebarGroupLabel>Formularios</SidebarGroupLabel>
@@ -148,16 +146,14 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
-                 {profile.role !== 'supervisor' && (
-                    <SidebarMenuItem>
-                      <Link href="/forms/programmed-visit" passHref>
-                        <SidebarMenuButton isActive={pathname.startsWith('/forms/programmed-visit')}>
-                          <CalendarCheck />
-                          Visita Programada
-                        </SidebarMenuButton>
-                      </Link>
-                    </SidebarMenuItem>
-                  )}
+                <SidebarMenuItem>
+                  <Link href="/forms/programmed-visit" passHref>
+                    <SidebarMenuButton isActive={pathname.startsWith('/forms/programmed-visit')}>
+                      <CalendarCheck />
+                      Visita Programada
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <Link href="/forms/general-report" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/general-report')}>
