@@ -33,6 +33,7 @@ import {
   FileSpreadsheet,
   Calendar,
   ListChecks,
+  AreaChart,
 } from 'lucide-react';
 import { useUserProfile } from '@/context/user-profile-context';
 
@@ -64,6 +65,14 @@ export function AppSidebar() {
               <SidebarMenuButton isActive={pathname === '/'}>
                 <Home />
                 Dashboard
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+           <SidebarMenuItem>
+            <Link href="/analytics" passHref>
+              <SidebarMenuButton isActive={pathname === '/analytics'}>
+                <AreaChart />
+                Analíticas
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
