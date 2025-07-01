@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -13,8 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ProgrammedVisitForm } from '@/components/forms/programmed-visit-form';
 import { PlusCircle, RefreshCw, Edit, Trash2, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useUserProfile } from './user-profile-context';
-import { useToast } from './hooks/use-toast';
+import { useUserProfile } from '@/context/user-profile-context';
+import { useToast } from '@/hooks/use-toast';
 import { updateReport, deleteReport } from '@/app/actions';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { Label } from './ui/label';
