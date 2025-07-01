@@ -75,7 +75,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
-          {['admin', 'superuser', 'supervisor'].includes(profile.role) && (
+          {['admin', 'superuser'].includes(profile.role) && (
             <SidebarMenuItem>
               <Link href="/status" passHref>
                 <SidebarMenuButton isActive={pathname === '/status'}>

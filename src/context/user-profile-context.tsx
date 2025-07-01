@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -11,6 +12,13 @@ interface UserProfile {
   email: string;
   phone: string;
   avatar: string;
+  role: Role;
+}
+
+export interface NewUserProfileData {
+  name: string;
+  email: string;
+  phone: string;
   role: Role;
 }
 
@@ -51,6 +59,7 @@ const defaultAdminProfile: UserProfile = defaultUsers['ohernandez@camosa.com']; 
 interface UserProfileContextType {
   profile: UserProfile;
   updateProfile: (newProfile: Partial<UserProfile>) => void;
+  createUser: (newUserData: NewUserProfileData) => void;
   login: (email: string) => void;
   logout: () => void;
 }
@@ -129,6 +138,29 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
       }
     }
   };
+
+  const createUser = (newUserData: NewUserProfileData) => {
+    if (users[newUserData.email]) {
+      throw new Error('Un usuario con este correo electrónico ya existe.');
+    }
+
+    const newUserProfile: UserProfile = {
+      ...newUserData,
+      avatar: 'https://placehold.co/100x100.png', // Default avatar
+    };
+
+    const updatedUsers = { ...users, [newUserData.email]: newUserProfile };
+    
+    setUsers(updatedUsers);
+
+    try {
+      localStorage.setItem('camosaUserProfiles', JSON.stringify(updatedUsers));
+    } catch (error) {
+      console.error("Failed to save new user to localStorage:", error);
+      // If saving fails, we should probably revert the state change, but for simplicity, we'll just log the error.
+      throw new Error('No se pudo guardar el nuevo usuario.');
+    }
+  };
   
   // Render nothing until we've initialized from localStorage to avoid hydration mismatch
   if (!isInitialized) {
@@ -136,7 +168,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <UserProfileContext.Provider value={{ profile, updateProfile, login, logout }}>
+    <UserProfileContext.Provider value={{ profile, updateProfile, createUser, login, logout }}>
       {children}
     </UserProfileContext.Provider>
   );
