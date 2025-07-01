@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -31,6 +32,7 @@ import {
   FilePlus,
   FileSpreadsheet,
   Calendar,
+  ListChecks,
 } from 'lucide-react';
 import { useUserProfile } from '@/context/user-profile-context';
 
@@ -73,6 +75,16 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
+          {['admin', 'superuser', 'supervisor'].includes(profile.role) && (
+            <SidebarMenuItem>
+              <Link href="/status" passHref>
+                <SidebarMenuButton isActive={pathname === '/status'}>
+                  <ListChecks />
+                  Estados
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          )}
           {profile.role !== 'supervisor' && (
             <SidebarMenuItem>
               <Link href="/calendar" passHref>

@@ -18,6 +18,7 @@ let reports: any[] = [
         contactPhone: '555-1111',
         visitPurpose: 'Inspección de 500 horas para la excavadora.',
         createdAt: new Date('2024-07-28T15:00:00Z').toISOString(),
+        status: 'En Progreso',
     },
     {
         id: 'PV-002',
@@ -31,6 +32,7 @@ let reports: any[] = [
         contactPhone: '555-2222',
         visitPurpose: 'Diagnóstico de sistema hidráulico.',
         createdAt: new Date('2024-07-28T16:00:00Z').toISOString(),
+        status: 'En Progreso',
     },
     {
         id: 'PV-003',
@@ -44,6 +46,7 @@ let reports: any[] = [
         contactPhone: '555-3333',
         visitPurpose: 'Mantenimiento preventivo programado.',
         createdAt: new Date('2024-07-30T11:00:00Z').toISOString(),
+        status: 'Pendiente',
     },
     {
         id: 'PV-004',
@@ -57,6 +60,7 @@ let reports: any[] = [
         contactPhone: '555-1111',
         visitPurpose: 'Revisión de transmisión reportada.',
         createdAt: new Date('2024-08-01T10:00:00Z').toISOString(),
+        status: 'Pendiente',
     },
     {
         id: 'GR-001',
@@ -66,6 +70,7 @@ let reports: any[] = [
         location: 'Taller Principal',
         details: 'Se reporta una fuga de aceite en la bahía 3.',
         createdAt: new Date('2024-07-28T10:00:00Z').toISOString(),
+        status: 'Completado',
     },
     {
         id: 'MR-001',
@@ -84,6 +89,7 @@ let reports: any[] = [
         nextServiceDate: new Date('2024-10-27T14:30:00Z').toISOString(),
         partsUsed: '1x Filtro de aceite (P/N: CAT-123), 1x Filtro de aire (P/N: CAT-456)',
         safetyCheckPassed: true,
+        status: 'Completado',
     },
     {
         id: 'INSP-001',
@@ -102,6 +108,7 @@ let reports: any[] = [
         safetyEquipment: true,
         passedInspection: true,
         createdAt: new Date('2024-07-26T11:00:00Z').toISOString(),
+        status: 'Completado',
     },
     {
         id: 'OT-001',
@@ -132,6 +139,7 @@ let reports: any[] = [
         finalStatus: 'repaired',
         repairCompleted: true,
         createdAt: new Date('2024-07-24T17:00:00Z').toISOString(),
+        status: 'Esperando Repuestos',
     },
     {
         id: 'WAR-001',
@@ -151,6 +159,7 @@ let reports: any[] = [
         claimStatus: 'under-review',
         claimDescription: 'El alternador dejó de funcionar prematuramente.',
         createdAt: new Date('2024-07-23T14:00:00Z').toISOString(),
+        status: 'En Progreso',
     },
     {
         id: 'FLUID-001',
@@ -165,6 +174,7 @@ let reports: any[] = [
         analysisSummary: 'Niveles de hierro ligeramente elevados. Se recomienda monitorear en el próximo cambio.',
         actionRequired: 'monitor',
         createdAt: new Date('2024-07-21T15:00:00Z').toISOString(),
+        status: 'Completado',
     }
 ];
 
@@ -183,15 +193,21 @@ export async function updateReport(updatedReportData: any) {
     if (reportIndex === -1) {
       throw new Error('Reporte no encontrado.');
     }
+    // Lock completed reports from being edited
+    if (reports[reportIndex].status === 'Completado') {
+        throw new Error('No se puede modificar un reporte que ya ha sido completado.');
+    }
     // Update the report in the array
     reports[reportIndex] = { ...updatedReportData };
     console.log('Report updated in in-memory store:', reports[reportIndex]);
     revalidatePath('/reports');
     revalidatePath('/calendar');
+    revalidatePath('/status');
     return { success: true, report: reports[reportIndex] };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'No se pudo actualizar el reporte. Por favor, inténtelo de nuevo.';
     console.error('Error updating report in in-memory store:', error);
-    throw new Error('No se pudo actualizar el reporte. Por favor, inténtelo de nuevo.');
+    throw new Error(errorMessage);
   }
 }
 
@@ -220,6 +236,7 @@ export async function saveMaintenanceReport(reportData: any): Promise<string> {
       id: `MR-${Date.now()}`, // Simple unique ID
       formType: 'Reporte de Mantenimiento',
       createdAt: new Date().toISOString(),
+      status: 'Pendiente',
     };
     reports.push(newReport);
     console.log('Maintenance report saved to in-memory store:', newReport);
@@ -239,6 +256,7 @@ export async function saveGeneralReport(reportData: any): Promise<string> {
       id: newId,
       formType: 'Reporte General',
       createdAt: new Date().toISOString(),
+      status: 'Pendiente',
     };
     reports.push(newReport);
     console.log('General report saved to in-memory store:', newReport);
@@ -258,6 +276,7 @@ export async function saveInspectionReport(reportData: any): Promise<string> {
             id: newId,
             formType: 'Reporte de Inspección',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Inspection report saved to in-memory store:', newReport);
@@ -277,6 +296,7 @@ export async function saveRepairReport(reportData: any): Promise<string> {
             id: newId,
             formType: 'Reporte de Reparación',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Repair report saved to in-memory store:', newReport);
@@ -296,6 +316,7 @@ export async function saveWorkOrder(reportData: any): Promise<string> {
             id: newId,
             formType: 'Orden de Trabajo',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Work order saved to in-memory store:', newReport);
@@ -315,6 +336,7 @@ export async function saveProgrammedVisit(reportData: any): Promise<string> {
             id: newId,
             formType: 'Visita Programada',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Programmed visit saved to in-memory store:', newReport);
@@ -335,6 +357,7 @@ export async function saveWarrantyClaim(reportData: any): Promise<string> {
             id: newId,
             formType: 'Reclamo de Garantía',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Warranty claim saved to in-memory store:', newReport);
@@ -354,6 +377,7 @@ export async function saveSafetyReport(reportData: any): Promise<string> {
             id: newId,
             formType: 'Reporte de Cumplimiento de Seguridad',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Safety report saved to in-memory store:', newReport);
@@ -373,6 +397,7 @@ export async function saveFluidAnalysis(reportData: any): Promise<string> {
             id: newId,
             formType: 'Reporte de Análisis de Fluidos',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Fluid analysis saved to in-memory store:', newReport);
@@ -392,6 +417,7 @@ export async function saveRentalAgreement(reportData: any): Promise<string> {
             id: newId,
             formType: 'Contrato de Alquiler',
             createdAt: new Date().toISOString(),
+            status: 'Pendiente',
         };
         reports.push(newReport);
         console.log('Rental agreement saved to in-memory store:', newReport);

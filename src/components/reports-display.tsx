@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -17,6 +18,7 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useUserProfile } from '@/context/user-profile-context';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 export function ReportsDisplay() {
   const [reports, setReports] = useState<any[]>([]);
@@ -83,11 +85,11 @@ export function ReportsDisplay() {
       setIsDialogOpen(false);
       fetchReports();
     } catch (error) {
-      console.error('Error updating report:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error.';
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'No se pudo actualizar el reporte.',
+        description: errorMessage,
       });
     } finally {
       setIsSaving(false);
@@ -220,6 +222,8 @@ export function ReportsDisplay() {
     return String(value);
   }
 
+  const isCompleted = selectedReport?.status === 'Completado';
+
   return (
     <>
       <Card>
@@ -349,39 +353,71 @@ export function ReportsDisplay() {
                   <div className="flex w-full justify-between items-center">
                     <div className="flex items-center gap-2">
                       {canEdit && (
-                        <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </Button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <span tabIndex={isCompleted ? 0 : -1} className={isCompleted ? 'cursor-not-allowed' : ''}>
+                                    <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsEditing(true)}
+                                    disabled={isCompleted}
+                                    className="w-full"
+                                    >
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Editar
+                                    </Button>
+                                </span>
+                                </TooltipTrigger>
+                                {isCompleted && (
+                                <TooltipContent>
+                                    <p>Los reportes completados no se pueden editar.</p>
+                                </TooltipContent>
+                                )}
+                            </Tooltip>
+                        </TooltipProvider>
                       )}
                       {canDelete && (
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>¿Está absolutamente seguro?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Esta acción no se puede deshacer. Esto eliminará permanentemente el reporte de los datos temporales.
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
-                                    {isDeleting ? (
-                                        <>
-                                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                                            Eliminando...
-                                        </>
-                                    ) : 'Continuar'}
-                                </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <span tabIndex={isCompleted ? 0 : -1} className={isCompleted ? 'cursor-not-allowed' : ''}>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" disabled={isCompleted}>
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Eliminar
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Está absolutamente seguro?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Esta acción no se puede deshacer. Esto eliminará permanentemente el reporte de los datos temporales.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
+                                                {isDeleting ? (
+                                                    <>
+                                                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                                        Eliminando...
+                                                    </>
+                                                ) : 'Continuar'}
+                                            </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </span>
+                                </TooltipTrigger>
+                                {isCompleted && (
+                                <TooltipContent>
+                                    <p>Los reportes completados no se pueden eliminar.</p>
+                                </TooltipContent>
+                                )}
+                            </Tooltip>
+                        </TooltipProvider>
                       )}
                     </div>
                     <DialogClose asChild>
