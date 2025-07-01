@@ -6,53 +6,66 @@ import { Calendar } from '@/components/ui/calendar';
 import { format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
+import type { VariantProps } from 'class-variance-authority';
+import { badgeVariants } from './ui/badge';
 
-// The raw data from server actions
-interface RawProgrammedVisit {
+// A generic event structure for the calendar
+export interface CalendarEvent {
     id: string;
-    clientName: string;
-    location: string;
-    scheduledDate: string; // ISO String
-    visitPurpose: string;
-    assignedTechnician: string;
-    equipmentId: string;
+    date: string; // ISO String
+    title: string;
+    type: string;
+    details: Record<string, string>;
 }
 
-// The processed data with Date objects
-interface ProcessedProgrammedVisit extends Omit<RawProgrammedVisit, 'scheduledDate'> {
-    scheduledDate: Date;
+interface ProcessedCalendarEvent extends Omit<CalendarEvent, 'date'> {
+    date: Date;
 }
 
 interface TechnicianCalendarProps {
-    appointments: RawProgrammedVisit[];
+    events: CalendarEvent[];
 }
 
-export function TechnicianCalendar({ appointments: rawAppointments = [] }: TechnicianCalendarProps) {
-    // 1. Process raw appointments to convert date strings to Date objects
-    const appointments: ProcessedProgrammedVisit[] = useMemo(() => 
-        rawAppointments.map(a => ({...a, scheduledDate: new Date(a.scheduledDate)})), 
-        [rawAppointments]
+export function TechnicianCalendar({ events: rawEvents = [] }: TechnicianCalendarProps) {
+    const events: ProcessedCalendarEvent[] = useMemo(() => 
+        rawEvents.map(e => ({...e, date: new Date(e.date)})), 
+        [rawEvents]
     );
 
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-    // 2. Get a list of dates that have appointments for highlighting
-    const appointmentDates = useMemo(() => appointments.map(app => app.scheduledDate), [appointments]);
+    const eventDates = useMemo(() => events.map(event => event.date), [events]);
 
-    // 3. Filter appointments for the currently selected day
-    const selectedDayAppointments = useMemo(() => {
+    const selectedDayEvents = useMemo(() => {
         if (!selectedDate) return [];
-        return appointments.filter(
-            (appointment) => isSameDay(appointment.scheduledDate, selectedDate)
-        ).sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
-    }, [appointments, selectedDate]);
+        return events.filter(
+            (event) => isSameDay(event.date, selectedDate)
+        ).sort((a, b) => a.date.getTime() - b.date.getTime());
+    }, [events, selectedDate]);
 
-    // 4. A more prominent style for highlighting
     const dayWithAppointmentStyle = {
         backgroundColor: 'hsl(var(--accent))',
         color: 'hsl(var(--accent-foreground))',
         borderRadius: '0.25rem',
     };
+    
+    const getEventTypeVariant = (type: string): VariantProps<typeof badgeVariants>["variant"] => {
+        switch (type) {
+            case 'Visita Programada':
+                return 'default';
+            case 'Próximo Servicio':
+                return 'secondary';
+            case 'Inspección':
+                return 'outline';
+            case 'Mantenimiento':
+                return 'outline';
+             case 'Orden de Trabajo':
+                return 'destructive';
+            default:
+                return 'secondary';
+        }
+    }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -64,10 +77,10 @@ export function TechnicianCalendar({ appointments: rawAppointments = [] }: Techn
                     className="p-3"
                     locale={es}
                     modifiers={{
-                        appointment: appointmentDates
+                        hasEvent: eventDates
                     }}
                     modifiersStyles={{
-                        appointment: dayWithAppointmentStyle,
+                        hasEvent: dayWithAppointmentStyle,
                     }}
                 />
             </Card>
@@ -75,37 +88,40 @@ export function TechnicianCalendar({ appointments: rawAppointments = [] }: Techn
             <Card className="md:col-span-1 lg:col-span-2">
                 <CardHeader>
                     <CardTitle>
-                        Citas para {selectedDate ? format(selectedDate, 'PPP', { locale: es }) : 'el día seleccionado'}
+                        Eventos para {selectedDate ? format(selectedDate, 'PPP', { locale: es }) : 'el día seleccionado'}
                     </CardTitle>
                     <CardDescription>
-                        {selectedDayAppointments.length > 0 
-                            ? `Usted tiene ${selectedDayAppointments.length} cita(s) programada(s).` 
-                            : 'No hay citas programadas para este día.'}
+                        {selectedDayEvents.length > 0 
+                            ? `Usted tiene ${selectedDayEvents.length} evento(s) programado(s).` 
+                            : 'No hay eventos programados para este día.'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ScrollArea className="h-[400px]">
                         <div className="space-y-4 pr-4">
-                            {selectedDayAppointments.length > 0 ? (
-                                selectedDayAppointments.map(app => (
-                                    <div key={app.id} className="p-4 border rounded-lg shadow-sm bg-card">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="font-semibold text-primary">{app.clientName}</h3>
-                                                <p className="text-sm text-muted-foreground">{app.location}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-semibold text-sm">{format(app.scheduledDate, 'p', { locale: es })}</p>
-                                                <p className="text-xs text-muted-foreground font-code">{app.equipmentId}</p>
-                                            </div>
+                            {selectedDayEvents.length > 0 ? (
+                                selectedDayEvents.map(event => (
+                                    <div key={event.id} className="p-4 border rounded-lg shadow-sm bg-card">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-semibold text-primary">{event.title}</h3>
+                                            <Badge variant={getEventTypeVariant(event.type)}>{event.type}</Badge>
                                         </div>
-                                        <p className="text-sm mt-2">{app.visitPurpose}</p>
-                                        <p className="text-xs text-muted-foreground mt-2">Técnico: {app.assignedTechnician}</p>
+                                        <div className="space-y-1 text-sm">
+                                            {Object.entries(event.details).map(([key, value]) => (
+                                                value && (
+                                                    <div key={key} className="flex">
+                                                        <span className="font-medium w-32 shrink-0">{key}:</span>
+                                                        <span className="text-muted-foreground">{value}</span>
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                        <p className="text-right font-semibold text-xs mt-2">{format(event.date, 'p', { locale: es })}</p>
                                     </div>
                                 ))
                             ) : (
                                 <div className="flex items-center justify-center h-full">
-                                    <p className="text-center text-muted-foreground py-8">Seleccione un día del calendario para ver las citas.</p>
+                                    <p className="text-center text-muted-foreground py-8">Seleccione un día del calendario para ver los eventos.</p>
                                 </div>
                             )}
                         </div>
