@@ -3,7 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2, FilePlus } from 'lucide-react';
+import { Loader2, FilePlus, Mic } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { saveGeneralReport } from '@/app/actions';
+import { cn } from '@/lib/utils';
 
 const generalReportSchema = z.object({
   reportName: z.string().min(2, { message: 'El nombre del reporte debe tener al menos 2 caracteres.' }),
@@ -21,6 +23,25 @@ const generalReportSchema = z.object({
 });
 
 type GeneralReportValues = z.infer<typeof generalReportSchema>;
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: ((this: SpeechRecognition, ev: any) => any) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onerror: ((this: SpeechRecognition, ev: any) => any) | null;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: { new(): SpeechRecognition };
+    webkitSpeechRecognition: { new(): SpeechRecognition };
+  }
+}
+
 
 export function GeneralReportForm() {
   const { toast } = useToast();
@@ -34,53 +55,70 @@ export function GeneralReportForm() {
     },
   });
 
-  /*
-  const generatePdf = async (data: GeneralReportValues, reportId: string) => {
-    const { default: jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text('Reporte General', 105, 20, { align: 'center' });
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'es-ES';
 
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    const submissionDate = new Date().toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    doc.text(`ID del Reporte: ${reportId}`, 20, 40);
-    doc.text(`Fecha de Envío: ${submissionDate}`, 20, 48);
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+          const currentDetails = form.getValues('details');
+          form.setValue('details', currentDetails + finalTranscript);
+        };
 
-    doc.line(20, 55, 190, 55);
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+           toast({
+            variant: 'destructive',
+            title: 'Error de Reconocimiento de Voz',
+            description: 'No se pudo iniciar el servicio.',
+          });
+          setIsListening(false);
+        };
+        
+        recognition.onend = () => {
+          setIsListening(false);
+        };
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Nombre del Reporte:', 20, 65);
-    doc.setFont('helvetica', 'normal');
-    doc.text(data.reportName, 70, 65);
+        recognitionRef.current = recognition;
+      } else {
+        toast({
+            variant: 'destructive',
+            title: 'Navegador no compatible',
+            description: 'El reconocimiento de voz no es compatible con su navegador.',
+        });
+      }
+    }
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Enviado Por:', 20, 75);
-    doc.setFont('helvetica', 'normal');
-    doc.text(data.submittedBy, 70, 75);
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, [form, toast]);
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Ubicación:', 20, 85);
-    doc.setFont('helvetica', 'normal');
-    doc.text(data.location, 70, 85);
-
-    doc.line(20, 95, 190, 95);
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Detalles del Reporte:', 20, 105);
-    doc.setFont('helvetica', 'normal');
-    const splitDetails = doc.splitTextToSize(data.details, 170);
-    doc.text(splitDetails, 20, 113);
-
-    doc.save(`reporte-general-${reportId}.pdf`);
+  const handleListen = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+    setIsListening(!isListening);
   };
-  */
+
 
   async function onSubmit(data: GeneralReportValues) {
     try {
@@ -89,9 +127,6 @@ export function GeneralReportForm() {
         title: '¡Reporte Enviado!',
         description: `Su reporte general ha sido enviado con el ID: ${newReportId}.`,
       });
-      
-      // await generatePdf(data, newReportId);
-
       form.reset();
     } catch (error) {
       console.error(error);
@@ -162,14 +197,30 @@ export function GeneralReportForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Detalles del Reporte</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describa el evento o la información a reportar..."
-                      className="resize-y min-h-[150px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>Proporcione todos los detalles relevantes.</FormDescription>
+                  <div className="relative">
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describa el evento o la información a reportar..."
+                        className="resize-y min-h-[150px] pr-12"
+                        {...field}
+                      />
+                    </FormControl>
+                     {recognitionRef.current && (
+                      <Button 
+                        type="button" 
+                        size="icon" 
+                        variant="ghost" 
+                        className={cn(
+                          "absolute right-2 top-2 h-8 w-8 text-muted-foreground",
+                          isListening && "text-primary animate-pulse"
+                        )}
+                        onClick={handleListen}
+                      >
+                        <Mic className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </div>
+                  <FormDescription>Proporcione todos los detalles relevantes. Puede usar el micrófono.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

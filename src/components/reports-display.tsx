@@ -20,6 +20,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useUserProfile } from '@/context/user-profile-context';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import Image from 'next/image';
 
 export function ReportsDisplay() {
   const [reports, setReports] = useState<any[]>([]);
@@ -207,7 +208,9 @@ export function ReportsDisplay() {
         insuranceProvider: 'Proveedor de Seguros',
         deliveryAddress: 'Dirección de Entrega',
         operatorName: 'Nombre del Operador',
-        termsAccepted: 'Términos Aceptados'
+        termsAccepted: 'Términos Aceptados',
+        photoDataUri: 'Evidencia Fotográfica',
+        signatureDataUri: 'Firma del Cliente',
   };
 
   const renderDetailValue = (key: string, value: any) => {
@@ -252,15 +255,22 @@ export function ReportsDisplay() {
     const pageHeight = doc.internal.pageSize.height;
     const bottomMargin = 15;
 
-    const addField = (label: string, value: string) => {
+    const addField = (label: string, value: any) => {
         const labelWidth = valueXPos - leftMargin - 5;
         const valueWidth = doc.internal.pageSize.width - valueXPos - leftMargin;
 
-        const labelLines = doc.splitTextToSize(label, labelWidth);
-        const valueLines = doc.splitTextToSize(value, valueWidth);
-        const lineHeight = Math.max(labelLines.length, valueLines.length) * 6;
+        const valueIsImageData = typeof value === 'string' && value.startsWith('data:image');
+        
+        let valueLines = [];
+        if (!valueIsImageData) {
+            valueLines = doc.splitTextToSize(String(value), valueWidth);
+        }
 
-        if (yPos + lineHeight > pageHeight - bottomMargin) {
+        const labelLines = doc.splitTextToSize(label, labelWidth);
+        const lineHeight = Math.max(labelLines.length, valueIsImageData ? 0 : valueLines.length) * 6;
+        const requiredHeight = valueIsImageData ? 50 : lineHeight; // 50mm for image
+
+        if (yPos + requiredHeight > pageHeight - bottomMargin) {
             doc.addPage();
             yPos = 20;
         }
@@ -268,17 +278,27 @@ export function ReportsDisplay() {
         doc.setFont('helvetica', 'bold');
         doc.text(label, leftMargin, yPos);
 
-        doc.setFont('helvetica', 'normal');
-        doc.text(valueLines, valueXPos, yPos);
-        
-        yPos += lineHeight + 4;
+        if (valueIsImageData) {
+            try {
+                doc.addImage(value, 'PNG', valueXPos, yPos - 3, 40, 40);
+                yPos += 45;
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+                doc.text('[Error al cargar imagen]', valueXPos, yPos);
+                yPos += 10;
+            }
+        } else {
+            doc.setFont('helvetica', 'normal');
+            doc.text(valueLines, valueXPos, yPos);
+            yPos += lineHeight + 4;
+        }
     };
     
     for (const [key, value] of Object.entries(selectedReport)) {
         if (key === 'id' || key === 'formType' || key === 'createdAt' || value === null || value === undefined || value === '') continue;
 
         const label = (keyTranslations[key] || key) + ':';
-        const formattedValue = renderDetailValue(key, value);
+        const formattedValue = (key === 'photoDataUri' || key === 'signatureDataUri') ? value : renderDetailValue(key, value);
         addField(label, formattedValue);
     }
 
@@ -365,18 +385,21 @@ export function ReportsDisplay() {
               <ScrollArea className="max-h-[60vh] pr-4">
                 <div className="grid gap-4 py-4">
                   {Object.entries(editedData || {}).map(([key, value]) => {
-                    if (key === 'id' || key === 'formType' || key === 'createdAt') return null;
+                    if (key === 'id' || key === 'formType' || key === 'createdAt' || value === null || value === undefined || value === '') return null;
                     
                     const displayKey = keyTranslations[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
-                    
+                    const isImageField = key === 'photoDataUri' || key === 'signatureDataUri';
+
                     if (isEditing) {
-                        const isUneditable = typeof value === 'boolean' || (typeof value === 'string' && isValid(new Date(value)) && value.includes('T'));
-                        const isLongText = typeof value === 'string' && value.length > 50;
+                        const isUneditable = typeof value === 'boolean' || (typeof value === 'string' && isValid(new Date(value)) && value.includes('T')) || isImageField;
+                        const isLongText = typeof value === 'string' && value.length > 50 && !isImageField;
 
                         return (
                             <div key={key} className="grid grid-cols-1 gap-2 py-2 border-b last:border-b-0">
                                 <Label htmlFor={key} className="font-semibold">{displayKey}</Label>
-                                {isUneditable ? (
+                                {isImageField && value ? (
+                                    <Image src={value as string} alt={displayKey} width={200} height={150} className="rounded-md border object-contain" />
+                                ) : isUneditable ? (
                                     <p className="text-sm text-muted-foreground break-words min-h-[40px] flex items-center">{renderDetailValue(key, value)}</p>
                                 ) : isLongText ? (
                                     <Textarea
@@ -394,6 +417,15 @@ export function ReportsDisplay() {
                                 )}
                             </div>
                         )
+                    }
+
+                    if (isImageField && value) {
+                      return (
+                        <div key={key} className="py-2 border-b last:border-b-0">
+                          <p className="font-semibold mb-2">{displayKey}</p>
+                          <Image src={value as string} alt={displayKey} width={400} height={200} className="rounded-md border object-contain" />
+                        </div>
+                      );
                     }
 
                     return (

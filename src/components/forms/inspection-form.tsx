@@ -3,9 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { CalendarDays, Loader2, ClipboardList } from 'lucide-react';
+import { CalendarDays, Loader2, ClipboardList, Camera, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { saveInspectionReport } from '@/app/actions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 const inspectionFormSchema = z.object({
   inspectorName: z.string().min(2, { message: 'El nombre del inspector debe tener al menos 2 caracteres.' }),
@@ -35,6 +39,7 @@ const inspectionFormSchema = z.object({
   notes: z.string().min(10, { message: 'Por favor provea algunas notas (mínimo 10 caracteres).' }).max(500),
   safetyEquipment: z.boolean().default(false).optional(),
   passedInspection: z.boolean().default(false).optional(),
+  photoDataUri: z.string().optional(),
 });
 
 type InspectionFormValues = z.infer<typeof inspectionFormSchema>;
@@ -55,90 +60,54 @@ export function InspectionForm() {
     },
   });
 
-  /*
-  const generatePdf = async (data: InspectionFormValues, reportId: string) => {
-    const { default: jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const conditionMap: { [key: string]: string } = { good: 'Buena', fair: 'Regular', poor: 'Mala' };
-    const fluidMap: { [key: string]: string } = { ok: 'OK', low: 'Bajo / Necesita Relleno', na: 'N/A' };
-    const systemStatusMap: { [key: string]: string } = { 
-        ok: 'OK', 
-        adjustment_needed: 'Necesita Ajuste', 
-        repair_needed: 'Necesita Reparación',
-        leaking: 'Fugas',
-        faulty: 'Componente Defectuoso',
-    };
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text('Reporte de Inspección', 105, 20, { align: 'center' });
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`ID del Reporte: ${reportId}`, 20, 40);
-    doc.text(`Fecha de Inspección: ${format(data.date, 'PPP', { locale: es })}`, 20, 48);
-    
-    doc.line(20, 55, 190, 55);
-
-    let y = 65;
-
-    const addField = (label: string, value: string | boolean | undefined) => {
-        if (value !== undefined && value !== null && value !== '') {
-            if (y > 280) { // Add a new page if content overflows
-                doc.addPage();
-                y = 20;
-            }
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${label}:`, 20, y);
-            doc.setFont('helvetica', 'normal');
-            
-            const textValue = typeof value === 'boolean' ? (value ? 'Sí' : 'No') : String(value);
-            const splitText = doc.splitTextToSize(textValue, 110);
-            doc.text(splitText, 80, y);
-            y += (splitText.length * 5) + 5;
+  useEffect(() => {
+    if (isCameraOpen) {
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setHasCameraPermission(true);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Acceso a la cámara denegado',
+            description: 'Por favor, habilite los permisos de la cámara en su navegador.',
+          });
         }
-    };
-    
-    addField('Nombre del Inspector', data.inspectorName);
-    addField('ID del Equipo', data.equipmentId);
-    addField('Ubicación', data.location);
-    
-    y += 5;
-    doc.line(20, y, 190, y);
-    y += 5;
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Resultados de la Inspección', 20, y);
-    y += 10;
-    
-    doc.setFont('helvetica', 'normal');
-    addField('Condición General', conditionMap[data.overallCondition]);
-    addField('Niveles de Fluido', fluidMap[data.fluidLevels]);
-    addField('Sistema de Frenos', systemStatusMap[data.brakeSystem]);
-    addField('Sistema Hidráulico', systemStatusMap[data.hydraulicSystem]);
-    addField('Sistema Eléctrico', systemStatusMap[data.electricalSystem]);
-    addField('Condición de Neumáticos', data.tireCondition);
-    if (data.attachmentsCondition) {
-        addField('Condición de Accesorios', data.attachmentsCondition);
+      };
+      getCameraPermission();
+    } else {
+      // Cleanup: stop video stream when dialog is closed
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
     }
-    
-    y += 5;
-    doc.line(20, y, 190, y);
-    y += 5;
-    
-    addField('Notas de Inspección', data.notes);
-    
-    y += 5;
-    doc.line(20, y, 190, y);
-    y += 5;
+  }, [isCameraOpen, toast]);
 
-    addField('Equipo de Seguridad OK', data.safetyEquipment);
-    addField('Inspección Aprobada', data.passedInspection);
-
-    doc.save(`reporte-inspeccion-${reportId}.pdf`);
+  const handleTakePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      const dataUri = canvas.toDataURL('image/jpeg');
+      form.setValue('photoDataUri', dataUri);
+      setIsCameraOpen(false);
+    }
   };
-  */
 
   async function onSubmit(data: InspectionFormValues) {
     try {
@@ -151,9 +120,6 @@ export function InspectionForm() {
         title: '¡Reporte de Inspección Enviado!',
         description: `Su reporte ha sido enviado con el ID: ${newReportId}.`,
       });
-      
-      // await generatePdf(data, newReportId);
-
       form.reset();
     } catch (error) {
       console.error(error);
@@ -165,7 +131,10 @@ export function InspectionForm() {
     }
   }
 
+  const photoDataUri = form.watch('photoDataUri');
+
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
@@ -405,6 +374,37 @@ export function InspectionForm() {
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-4">
+              <FormLabel>Evidencia Fotográfica</FormLabel>
+              <Card>
+                <CardContent className="p-4">
+                  {photoDataUri ? (
+                    <div className="relative w-full max-w-xs mx-auto">
+                      <Image src={photoDataUri} alt="Evidencia" width={400} height={300} className="rounded-md" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7"
+                        onClick={() => form.setValue('photoDataUri', undefined)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 text-center p-6 border-2 border-dashed rounded-md">
+                      <p className="text-sm text-muted-foreground">No se ha añadido ninguna foto.</p>
+                       <Button type="button" onClick={() => setIsCameraOpen(true)}>
+                        <Camera className="mr-2 h-4 w-4" />
+                        Agregar Foto
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-8">
               <FormField
                 control={form.control}
@@ -451,5 +451,30 @@ export function InspectionForm() {
         </Form>
       </CardContent>
     </Card>
+
+    <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+        <DialogContent>
+            <DialogHeader>
+            <DialogTitle>Tomar Foto</DialogTitle>
+            </DialogHeader>
+            <div className="relative">
+                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
+                <canvas ref={canvasRef} className="hidden" />
+                {hasCameraPermission === false && (
+                    <Alert variant="destructive" className="mt-4">
+                        <AlertTitle>Acceso a la cámara requerido</AlertTitle>
+                        <AlertDescription>
+                            Por favor permita el acceso a la cámara para usar esta función.
+                        </AlertDescription>
+                    </Alert>
+                )}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCameraOpen(false)}>Cancelar</Button>
+                <Button onClick={handleTakePhoto} disabled={!hasCameraPermission}>Tomar Foto</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }

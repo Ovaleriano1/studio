@@ -3,9 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { CalendarDays, Loader2, Hammer } from 'lucide-react';
+import { CalendarDays, Loader2, Hammer, PenTool, Eraser } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useRef, useEffect, useState } from 'react';
+
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +37,7 @@ const repairFormSchema = z.object({
   finalStatus: z.enum(['repaired', 'needs_follow_up', 'awaiting_parts']),
   repairCompleted: z.boolean().default(false),
   followUpRequired: z.boolean().default(false),
+  signatureDataUri: z.string().optional(),
 });
 
 type RepairFormValues = z.infer<typeof repairFormSchema>;
@@ -59,6 +62,84 @@ export function RepairForm() {
     },
   });
 
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef(false);
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      form.setValue('signatureDataUri', undefined);
+    }
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    const getCoords = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      if (e instanceof MouseEvent) {
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }
+      if (e.touches && e.touches.length > 0) {
+        return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      }
+      return { x: 0, y: 0 };
+    };
+
+    const startDrawing = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      isDrawingRef.current = true;
+      const { x, y } = getCoords(e);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    };
+
+    const draw = (e: MouseEvent | TouchEvent) => {
+      if (!isDrawingRef.current) return;
+      e.preventDefault();
+      const { x, y } = getCoords(e);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    };
+
+    const stopDrawing = () => {
+      isDrawingRef.current = false;
+      ctx.closePath();
+      const dataUrl = canvas.toDataURL('image/png');
+      form.setValue('signatureDataUri', dataUrl);
+    };
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
+
+    return () => {
+      canvas.removeEventListener('mousedown', startDrawing);
+      canvas.removeEventListener('mousemove', draw);
+      canvas.removeEventListener('mouseup', stopDrawing);
+      canvas.removeEventListener('mouseout', stopDrawing);
+
+      canvas.removeEventListener('touchstart', startDrawing);
+      canvas.removeEventListener('touchmove', draw);
+      canvas.removeEventListener('touchend', stopDrawing);
+    };
+  }, [form]);
+
+
   async function onSubmit(data: RepairFormValues) {
     try {
       const serializableData = {
@@ -71,6 +152,7 @@ export function RepairForm() {
         description: `Su reporte de reparación ha sido enviado con el ID: ${newReportId}.`
       });
       form.reset();
+      clearCanvas();
     } catch (error) {
       console.error(error);
       toast({
@@ -279,7 +361,25 @@ export function RepairForm() {
                 </FormItem>
               )}
             />
-            <div className="grid md:grid-cols-3 gap-8">
+             <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
+                <FormLabel>Firma del Cliente</FormLabel>
+                <Button type="button" variant="outline" size="sm" onClick={clearCanvas}>
+                  <Eraser className="mr-2 h-4 w-4" />
+                  Limpiar
+                </Button>
+              </div>
+              <div className="rounded-md border bg-background">
+                <canvas
+                  ref={canvasRef}
+                  width={500}
+                  height={200}
+                  className="w-full h-auto touch-none rounded-md"
+                />
+              </div>
+              <FormDescription>El cliente o supervisor debe firmar en el recuadro de arriba.</FormDescription>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 pt-4">
               <FormField
                 control={form.control}
                 name="repairCompleted"
