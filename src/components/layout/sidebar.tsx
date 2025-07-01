@@ -199,14 +199,6 @@ export function AppSidebar() {
                                     </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
-                                <SidebarMenuItem>
-                                  <Link href="/analytics" passHref>
-                                    <SidebarMenuButton isActive={pathname === '/analytics'}>
-                                      <AreaChart />
-                                      Análisis Gráfico
-                                    </SidebarMenuButton>
-                                  </Link>
-                                </SidebarMenuItem>
                             </SidebarMenu>
                         </div>
                     )}
@@ -218,6 +210,16 @@ export function AppSidebar() {
       <SidebarFooter>
         <Separator className="my-2 bg-sidebar-border" />
         <SidebarMenu>
+          {['admin', 'supervisor'].includes(profile.role) && (
+              <SidebarMenuItem>
+                <Link href="/analytics" passHref>
+                  <SidebarMenuButton isActive={pathname === '/analytics'}>
+                    <AreaChart />
+                    Análisis Gráfico
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+          )}
           {profile.role === 'admin' && (
             <SidebarMenuItem>
               <Link href="/settings" passHref>

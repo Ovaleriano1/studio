@@ -1,0 +1,27 @@
+{
+  "name": "CAMOSA App Tecnicos",
+  "short_name": "CAMOSA App",
+  "description": "Heavy Machinery Maintenance App for Technicians",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f5f1",
+  "theme_color": "#0A6416",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://placehold.co/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://placehold.co/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
