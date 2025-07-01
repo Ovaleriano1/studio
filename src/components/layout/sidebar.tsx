@@ -51,7 +51,7 @@ export function AppSidebar() {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-3 p-2">
-          <Image src="/LOGOCamosaCC.png" alt="CAMOSA Logo" width={32} height={32} />
+          <Image src="/LOGOCamosaCC.png" alt="CAMOSA Logo" width={40} height={40} />
           <div className="flex flex-col">
             <h1 className="text-lg font-bold text-sidebar-primary font-headline">CAMOSA App Tecnicos</h1>
           </div>
