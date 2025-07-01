@@ -14,7 +14,7 @@ export default async function AnalyticsPage() {
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
-        <AppHeader title="Analíticas" />
+        <AppHeader title="Análisis Gráfico" />
         <main className="p-4 lg:p-6">
           <AnalyticsDashboard reports={reports} />
         </main>

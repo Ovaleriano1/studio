@@ -296,14 +296,6 @@ export function ReportsDisplay() {
               <CardDescription>Una lista de todos los formularios que han sido enviados. Los datos son temporales.</CardDescription>
           </div>
            <div className="flex items-center gap-2">
-            {profile.role === 'supervisor' && (
-              <Link href="/analytics" passHref>
-                <Button variant="outline">
-                  <AreaChart className="mr-2 h-4 w-4" />
-                  Analíticas
-                </Button>
-              </Link>
-            )}
             <Button variant="outline" size="icon" onClick={fetchReports} disabled={isLoading}>
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 <span className="sr-only">Actualizar Reportes</span>

@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
@@ -21,6 +21,8 @@ const COLORS = [
   '#3b82f6',
   '#8b5cf6',
   '#ec4899',
+  '#f43f5e',
+  '#6b7280',
 ];
 
 export function AnalyticsDashboard({ reports }: AnalyticsDashboardProps) {
@@ -71,6 +73,55 @@ export function AnalyticsDashboard({ reports }: AnalyticsDashboardProps) {
       return acc;
     }, {} as Record<string, { label: string, color: string }>),
   }), [reportsByStatus]) satisfies ChartConfig;
+
+  const reportsByTechnician = useMemo(() => {
+    const getTechnician = (report: any) => report.technicianName || report.assignedTechnician || report.inspectorName || report.submittedBy || 'N/A';
+    
+    const counts = reports.reduce((acc, report) => {
+      const technician = getTechnician(report);
+      acc[technician] = (acc[technician] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(counts).map(([name, total]) => ({ name, total })).sort((a, b) => b.total - a.total);
+  }, [reports]);
+
+  const technicianChartConfig = useMemo(() => {
+     const config: ChartConfig = {
+      total: { label: 'Total' },
+     };
+     reportsByTechnician.forEach((item, index) => {
+        config[item.name] = {
+            label: item.name,
+            color: COLORS[(index + 2) % COLORS.length]
+        }
+     });
+     return config;
+  }, [reportsByTechnician]) satisfies ChartConfig;
+  
+  const reportsByEquipment = useMemo(() => {
+    const counts = reports.reduce((acc, report) => {
+        if (!report.equipmentId) return acc;
+        const equipment = report.equipmentId;
+        acc[equipment] = (acc[equipment] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(counts).map(([name, total]) => ({ name, total })).sort((a,b) => b.total - a.total).slice(0, 10);
+  }, [reports]);
+
+  const equipmentChartConfig = useMemo(() => {
+     const config: ChartConfig = {
+      total: { label: 'Total' },
+     };
+     reportsByEquipment.forEach((item, index) => {
+        config[item.name] = {
+            label: item.name,
+            color: COLORS[(index + 7) % COLORS.length]
+        }
+     });
+     return config;
+  }, [reportsByEquipment]) satisfies ChartConfig;
 
 
   return (
@@ -145,6 +196,69 @@ export function AnalyticsDashboard({ reports }: AnalyticsDashboardProps) {
                         ))}
                     </Pie>
                 </PieChart>
+            </ChartContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+            <CardTitle>Reportes por Técnico</CardTitle>
+            <CardDescription>Número de reportes asociados a cada técnico/usuario.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={technicianChartConfig} className="min-h-[300px] w-full">
+                <BarChart data={reportsByTechnician} margin={{ left: 20, right: 20 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis 
+                        dataKey="name" 
+                        tickLine={false} 
+                        tickMargin={10} 
+                        axisLine={false}
+                        tickFormatter={(value) => value.split(' ')[0]}
+                    />
+                     <YAxis hide />
+                    <ChartTooltip 
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar dataKey="total" radius={5}>
+                        {reportsByTechnician.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={technicianChartConfig[entry.name]?.color || COLORS[index % COLORS.length]} />
+                        ))}
+                    </Bar>
+                </BarChart>
+            </ChartContainer>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+            <CardTitle>Top 10 Equipos por Reportes</CardTitle>
+            <CardDescription>Equipos con el mayor número de reportes asociados.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <ChartContainer config={equipmentChartConfig} className="min-h-[300px] w-full">
+                <BarChart data={reportsByEquipment} layout="vertical" margin={{ left: 20, right: 20 }}>
+                    <CartesianGrid horizontal={false} />
+                    <XAxis type="number" dataKey="total" hide />
+                    <YAxis 
+                        dataKey="name"
+                        type="category"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        width={80}
+                    />
+                    <ChartTooltip 
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar dataKey="total" layout="vertical" radius={5}>
+                         {reportsByEquipment.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={equipmentChartConfig[entry.name]?.color || COLORS[index % COLORS.length]} />
+                        ))}
+                    </Bar>
+                </BarChart>
             </ChartContainer>
         </CardContent>
       </Card>

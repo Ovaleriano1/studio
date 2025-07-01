@@ -71,16 +71,6 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
-           {['admin', 'supervisor'].includes(profile.role) && (
-            <SidebarMenuItem>
-              <Link href="/analytics" passHref>
-                <SidebarMenuButton isActive={pathname === '/analytics'}>
-                  <AreaChart />
-                  Analíticas
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          )}
            <SidebarMenuItem>
             <Link href="/reports" passHref>
               <SidebarMenuButton isActive={pathname === '/reports'}>
@@ -208,6 +198,14 @@ export function AppSidebar() {
                                         Contrato de Alquiler
                                     </SidebarMenuButton>
                                     </Link>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem>
+                                  <Link href="/analytics" passHref>
+                                    <SidebarMenuButton isActive={pathname === '/analytics'}>
+                                      <AreaChart />
+                                      Análisis Gráfico
+                                    </SidebarMenuButton>
+                                  </Link>
                                 </SidebarMenuItem>
                             </SidebarMenu>
                         </div>
