@@ -60,7 +60,7 @@ interface UserProfileContextType {
   profile: UserProfile;
   updateProfile: (newProfile: Partial<UserProfile>) => void;
   createUser: (newUserData: NewUserProfileData) => void;
-  login: (email: string) => void;
+  login: (email: string) => UserProfile;
   logout: () => void;
 }
 
@@ -103,7 +103,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     setIsInitialized(true);
   }, []);
 
-  const login = (email: string) => {
+  const login = (email: string): UserProfile => {
     const userProfile = users[email] || defaultAdminProfile;
     setProfile(userProfile);
     try {
@@ -111,6 +111,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to set current user in localStorage:", error);
     }
+    return userProfile;
   };
   
   const logout = () => {

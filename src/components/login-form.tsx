@@ -42,12 +42,17 @@ export function LoginForm() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             if (userCredential.user.email) {
-                login(userCredential.user.email);
+                const userProfile = login(userCredential.user.email);
+                toast({
+                  title: `¡Bienvenido de vuelta, ${userProfile.name}!`,
+                  description: 'Has iniciado sesión correctamente.',
+                });
+            } else {
+                 toast({
+                    title: '¡Bienvenido de vuelta!',
+                    description: 'Has iniciado sesión correctamente.',
+                });
             }
-            toast({
-              title: '¡Bienvenido de vuelta!',
-              description: 'Has iniciado sesión correctamente.',
-            });
             router.push('/');
         } catch (error: any) {
             let errorMessage = 'Ocurrió un error al iniciar sesión. Por favor, inténtelo de nuevo.';
