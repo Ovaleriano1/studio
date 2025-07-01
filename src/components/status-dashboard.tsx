@@ -104,7 +104,7 @@ export function StatusDashboard() {
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="flex items-center gap-2 cursor-help">
-                                            <Badge variant="secondary">{report.status}</Badge>
+                                            <Badge variant="default">{report.status}</Badge>
                                             <Lock className="h-4 w-4 text-muted-foreground" />
                                         </div>
                                     </TooltipTrigger>
@@ -131,7 +131,7 @@ export function StatusDashboard() {
                                 </Select>
                             )
                             ) : (
-                            <Badge variant="secondary">{report.status}</Badge>
+                            <Badge variant={report.status === 'Completado' ? 'default' : 'secondary'}>{report.status}</Badge>
                             )}
                         </TableCell>
                         </TableRow>
