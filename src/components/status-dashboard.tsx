@@ -5,8 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge, badgeVariants } from '@/components/ui/badge';
-import type { VariantProps } from 'class-variance-authority';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getReports, updateReport } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +17,23 @@ import { RefreshCw, Lock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 const STATUS_OPTIONS = ['Pendiente', 'En Progreso', 'Esperando Repuestos', 'Completado', 'Cancelado'];
+
+const getStatusBadge = (status: string) => {
+    switch (status) {
+        case 'Completado':
+            return <Badge className="bg-green-600 text-primary-foreground hover:bg-green-600/90">Completado</Badge>;
+        case 'En Progreso':
+            return <Badge className="bg-blue-600 text-primary-foreground hover:bg-blue-600/90">En Progreso</Badge>;
+        case 'Pendiente':
+            return <Badge className="bg-orange-500 text-primary-foreground hover:bg-orange-500/90">Pendiente</Badge>;
+        case 'Esperando Repuestos':
+            return <Badge className="bg-yellow-500 text-secondary-foreground hover:bg-yellow-500/90">Esperando Repuestos</Badge>;
+        case 'Cancelado':
+            return <Badge variant="destructive">Cancelado</Badge>;
+        default:
+            return <Badge variant="secondary">{status}</Badge>;
+    }
+};
 
 export function StatusDashboard() {
   const [reports, setReports] = useState<any[]>([]);
@@ -58,17 +74,6 @@ export function StatusDashboard() {
       toast({ variant: 'destructive', title: 'Error al actualizar', description: errorMessage });
     } finally {
       setIsUpdating(null);
-    }
-  };
-
-  const getStatusBadgeVariant = (status: string): VariantProps<typeof badgeVariants>['variant'] => {
-    switch (status) {
-      case 'Completado':
-        return 'default';
-      case 'Cancelado':
-        return 'destructive';
-      default:
-        return 'secondary';
     }
   };
 
@@ -118,7 +123,7 @@ export function StatusDashboard() {
                                   <Tooltip>
                                       <TooltipTrigger asChild>
                                           <div className="flex items-center gap-2 cursor-help">
-                                              <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+                                              {getStatusBadge(report.status)}
                                               <Lock className="h-4 w-4 text-muted-foreground" />
                                           </div>
                                       </TooltipTrigger>
@@ -145,7 +150,7 @@ export function StatusDashboard() {
                                   </Select>
                               )
                               ) : (
-                                <Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+                                getStatusBadge(report.status)
                               )}
                           </TableCell>
                         </TableRow>

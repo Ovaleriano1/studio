@@ -27,6 +27,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { type DateRange } from 'react-day-picker';
 import { Badge } from './ui/badge';
 
+const getStatusBadge = (status: string) => {
+    switch (status) {
+        case 'Completado':
+            return <Badge className="bg-green-600 text-primary-foreground hover:bg-green-600/90">Completado</Badge>;
+        case 'En Progreso':
+            return <Badge className="bg-blue-600 text-primary-foreground hover:bg-blue-600/90">En Progreso</Badge>;
+        case 'Pendiente':
+            return <Badge className="bg-orange-500 text-primary-foreground hover:bg-orange-500/90">Pendiente</Badge>;
+        case 'Esperando Repuestos':
+            return <Badge className="bg-yellow-500 text-secondary-foreground hover:bg-yellow-500/90">Esperando Repuestos</Badge>;
+        case 'Cancelado':
+            return <Badge variant="destructive">Cancelado</Badge>;
+        default:
+            return <Badge variant="secondary">{status}</Badge>;
+    }
+};
+
 export function ReportsDisplay() {
   const [reports, setReports] = useState<any[]>([]);
   const [filteredReports, setFilteredReports] = useState<any[]>([]);
@@ -250,7 +267,28 @@ export function ReportsDisplay() {
         finalPhotoDataUri: 'Foto Final del Equipo', signatureDataUri: 'Firma del Cliente',
   };
 
+  const valueTranslations: { [key: string]: { [value: string]: string } } = {
+    serviceType: { scheduled: 'Programado', emergency: 'Emergencia', preventive: 'Preventivo' },
+    fluidCheck: { ok: 'OK', refill: 'Requiere Relleno', na: 'No Aplica' },
+    overallCondition: { good: 'Buena', fair: 'Regular', poor: 'Mala' },
+    fluidLevels: { ok: 'OK', low: 'Bajo / Necesita Relleno', na: 'N/A' },
+    brakeSystem: { ok: 'OK', adjustment_needed: 'Necesita Ajuste', repair_needed: 'Necesita Reparación' },
+    hydraulicSystem: { ok: 'OK', leaking: 'Fugas', repair_needed: 'Necesita Reparación' },
+    electricalSystem: { ok: 'OK', faulty: 'Componente Defectuoso', repair_needed: 'Necesita Reparación' },
+    finalStatus: { repaired: 'Reparado y Operacional', needs_follow_up: 'Necesita Seguimiento', awaiting_parts: 'Esperando Repuestos' },
+    priority: { low: 'Baja', medium: 'Media', high: 'Alta', urgent: 'Urgente' },
+    status: { pending: 'Pendiente', 'in-progress': 'En Progreso', completed: 'Completado' },
+    claimType: { part: 'Solo Parte', labor: 'Solo Mano de Obra', both: 'Parte y Mano de Obra' },
+    claimStatus: { submitted: 'Enviado', 'under-review': 'En Revisión', approved: 'Aprobado', denied: 'Rechazado' },
+    overallSafetyRating: { excellent: 'Excelente', good: 'Buena', needs_improvement: 'Necesita Mejora', unsafe: 'Inseguro' },
+    fluidType: { engine_oil: 'Aceite de Motor', hydraulic_fluid: 'Fluido Hidráulico', coolant: 'Refrigerante', transmission_fluid: 'Fluido de Transmisión' },
+    actionRequired: { none: 'Ninguna', monitor: 'Monitorear', change_fluid: 'Cambiar Fluido', immediate_repair: 'Reparación Inmediata' },
+  };
+
   const renderDetailValue = (key: string, value: any) => {
+    if (valueTranslations[key] && valueTranslations[key][value]) {
+        return valueTranslations[key][value];
+    }
     if (typeof value === 'string') {
         const potentialDate = new Date(value);
         if (isValid(potentialDate) && value.includes('T') && value.includes('Z')) {
@@ -454,7 +492,7 @@ export function ReportsDisplay() {
                         {format(new Date(report.createdAt), 'PPP p', { locale: es })}
                       </TableCell>
                        <TableCell className="hidden md:table-cell">
-                        <Badge>{report.status}</Badge>
+                        {getStatusBadge(report.status)}
                       </TableCell>
                       <TableCell className="text-right">
                           <Button variant="outline" size="sm" onClick={() => handleViewDetails(report)}>Ver Detalles</Button>
