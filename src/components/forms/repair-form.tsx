@@ -3,11 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { CalendarDays, Loader2, Hammer, PenTool, Eraser } from 'lucide-react';
+import { CalendarDays, Loader2, Hammer, PenTool, Eraser, Camera, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useRef, useEffect, useState } from 'react';
-
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { saveRepairReport } from '@/app/actions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 const repairFormSchema = z.object({
   technicianName: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
@@ -29,11 +31,13 @@ const repairFormSchema = z.object({
   date: z.date({ required_error: 'Se requiere una fecha.' }),
   equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
   laborHours: z.coerce.number().min(0, { message: 'Las horas deben ser un número positivo.' }),
+  initialPhotoDataUri: z.string().optional(),
   symptoms: z.string().min(10, { message: 'Por favor describa los síntomas (mínimo 10 caracteres).' }),
   problemDescription: z.string().min(10, { message: 'Por favor describa el problema (mínimo 10 caracteres).' }).max(500),
   diagnosticSteps: z.string().min(10, { message: 'Por favor describa los pasos de diagnóstico (mínimo 10 caracteres).' }),
   partsUsed: z.string().optional(),
   testingNotes: z.string().optional(),
+  finalPhotoDataUri: z.string().optional(),
   finalStatus: z.enum(['repaired', 'needs_follow_up', 'awaiting_parts']),
   repairCompleted: z.boolean().default(false),
   followUpRequired: z.boolean().default(false),
@@ -62,11 +66,21 @@ export function RepairForm() {
     },
   });
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // State and Refs for Camera
+  const [cameraState, setCameraState] = useState<{ isOpen: boolean; targetField: 'initial' | 'final' | null }>({
+    isOpen: false,
+    targetField: null,
+  });
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const photoCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  // State and Refs for Signature Pad
+  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
 
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
+  const clearSignature = () => {
+    const canvas = signatureCanvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
@@ -74,8 +88,9 @@ export function RepairForm() {
     }
   };
 
+  // Effect for Signature Pad
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = signatureCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -112,6 +127,7 @@ export function RepairForm() {
     };
 
     const stopDrawing = () => {
+      if (!isDrawingRef.current) return;
       isDrawingRef.current = false;
       ctx.closePath();
       const dataUrl = canvas.toDataURL('image/png');
@@ -139,6 +155,98 @@ export function RepairForm() {
     };
   }, [form]);
 
+  // Effect for Camera
+  useEffect(() => {
+    if (cameraState.isOpen) {
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setHasCameraPermission(true);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Acceso a la cámara denegado',
+            description: 'Por favor, habilite los permisos de la cámara en su navegador.',
+          });
+        }
+      };
+      getCameraPermission();
+    } else {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [cameraState.isOpen, toast]);
+
+  const openCamera = (targetField: 'initial' | 'final') => {
+    setCameraState({ isOpen: true, targetField });
+  };
+
+  const handleTakePhoto = () => {
+    if (videoRef.current && photoCanvasRef.current && cameraState.targetField) {
+      const video = videoRef.current;
+      const canvas = photoCanvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      const dataUri = canvas.toDataURL('image/jpeg');
+      
+      const fieldName = cameraState.targetField === 'initial' ? 'initialPhotoDataUri' : 'finalPhotoDataUri';
+      form.setValue(fieldName, dataUri);
+      
+      setCameraState({ isOpen: false, targetField: null });
+    }
+  };
+  
+  const initialPhotoDataUri = form.watch('initialPhotoDataUri');
+  const finalPhotoDataUri = form.watch('finalPhotoDataUri');
+
+  const PhotoCaptureCard = ({
+    label,
+    fieldValue,
+    onButtonClick,
+    onClear,
+  }: {
+    label: string;
+    fieldValue: string | undefined;
+    onButtonClick: () => void;
+    onClear: () => void;
+  }) => (
+    <Card>
+      <CardContent className="p-4">
+        {fieldValue ? (
+          <div className="relative w-full max-w-xs mx-auto">
+            <Image src={fieldValue} alt={label} width={400} height={300} className="rounded-md" />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-7 w-7"
+              onClick={onClear}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 text-center p-6 border-2 border-dashed rounded-md">
+            <p className="text-sm text-muted-foreground">No se ha añadido ninguna foto.</p>
+            <Button type="button" onClick={onButtonClick}>
+              <Camera className="mr-2 h-4 w-4" />
+              {label}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   async function onSubmit(data: RepairFormValues) {
     try {
@@ -152,7 +260,7 @@ export function RepairForm() {
         description: `Su reporte de reparación ha sido enviado con el ID: ${newReportId}.`
       });
       form.reset();
-      clearCanvas();
+      clearSignature();
     } catch (error) {
       console.error(error);
       toast({
@@ -164,6 +272,7 @@ export function RepairForm() {
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
@@ -275,6 +384,17 @@ export function RepairForm() {
                 )}
               />
             </div>
+
+            <div className="space-y-2">
+                <FormLabel>Evidencia Fotográfica Inicial</FormLabel>
+                <PhotoCaptureCard
+                    label="Agregar Foto Inicial"
+                    fieldValue={initialPhotoDataUri}
+                    onButtonClick={() => openCamera('initial')}
+                    onClear={() => form.setValue('initialPhotoDataUri', undefined)}
+                />
+            </div>
+            
             <FormField
               control={form.control}
               name="symptoms"
@@ -361,17 +481,28 @@ export function RepairForm() {
                 </FormItem>
               )}
             />
-             <div className="space-y-4 pt-4">
+
+            <div className="space-y-2">
+                <FormLabel>Evidencia Fotográfica Final</FormLabel>
+                <PhotoCaptureCard
+                    label="Agregar Foto Final"
+                    fieldValue={finalPhotoDataUri}
+                    onButtonClick={() => openCamera('final')}
+                    onClear={() => form.setValue('finalPhotoDataUri', undefined)}
+                />
+            </div>
+
+            <div className="space-y-4 pt-4">
               <div className="flex items-center justify-between">
                 <FormLabel>Firma del Cliente</FormLabel>
-                <Button type="button" variant="outline" size="sm" onClick={clearCanvas}>
+                <Button type="button" variant="outline" size="sm" onClick={clearSignature}>
                   <Eraser className="mr-2 h-4 w-4" />
                   Limpiar
                 </Button>
               </div>
               <div className="rounded-md border bg-background">
                 <canvas
-                  ref={canvasRef}
+                  ref={signatureCanvasRef}
                   width={500}
                   height={200}
                   className="w-full h-auto touch-none rounded-md"
@@ -447,5 +578,30 @@ export function RepairForm() {
         </Form>
       </CardContent>
     </Card>
+
+    <Dialog open={cameraState.isOpen} onOpenChange={(open) => setCameraState({ ...cameraState, isOpen: open })}>
+        <DialogContent>
+            <DialogHeader>
+            <DialogTitle>Tomar Foto</DialogTitle>
+            </DialogHeader>
+            <div className="relative">
+                <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
+                <canvas ref={photoCanvasRef} className="hidden" />
+                {hasCameraPermission === false && (
+                    <Alert variant="destructive" className="mt-4">
+                        <AlertTitle>Acceso a la cámara requerido</AlertTitle>
+                        <AlertDescription>
+                            Por favor permita el acceso a la cámara para usar esta función.
+                        </AlertDescription>
+                    </Alert>
+                )}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setCameraState({ isOpen: false, targetField: null })}>Cancelar</Button>
+                <Button onClick={handleTakePhoto} disabled={!hasCameraPermission}>Tomar Foto</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
