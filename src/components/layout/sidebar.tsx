@@ -36,6 +36,7 @@ import {
   ListChecks,
   AreaChart,
   ChevronRight,
+  Lightbulb,
 } from 'lucide-react';
 import { useUserProfile } from '@/context/user-profile-context';
 
@@ -94,6 +95,14 @@ export function AppSidebar() {
               <SidebarMenuButton isActive={pathname.startsWith('/calendar')}>
                 <Calendar />
                 Calendario
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Link href="/troubleshoot" passHref>
+              <SidebarMenuButton isActive={pathname.startsWith('/troubleshoot')}>
+                <Lightbulb />
+                Asistente de Diagnóstico
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
