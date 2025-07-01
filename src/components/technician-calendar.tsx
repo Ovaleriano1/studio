@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
@@ -29,7 +29,7 @@ interface TechnicianCalendarProps {
 
 export function TechnicianCalendar({ events: rawEvents = [] }: TechnicianCalendarProps) {
     const events: ProcessedCalendarEvent[] = useMemo(() => 
-        rawEvents.map(e => ({...e, date: new Date(e.date)})), 
+        rawEvents.map(e => ({...e, date: parseISO(e.date)})), 
         [rawEvents]
     );
 
