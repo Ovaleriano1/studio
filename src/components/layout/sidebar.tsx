@@ -89,7 +89,7 @@ export function AppSidebar() {
           {['admin', 'superuser', 'supervisor'].includes(profile.role) && (
             <SidebarMenuItem>
               <Link href="/status" passHref>
-                <SidebarMenuButton isActive={pathname === '/status'}>
+                <SidebarMenuButton isActive={pathname.startsWith('/status')}>
                   <ListChecks />
                   Estados
                 </SidebarMenuButton>
@@ -99,7 +99,7 @@ export function AppSidebar() {
           {profile.role !== 'supervisor' && (
             <SidebarMenuItem>
               <Link href="/calendar" passHref>
-                <SidebarMenuButton isActive={pathname === '/calendar'}>
+                <SidebarMenuButton isActive={pathname.startsWith('/calendar')}>
                   <Calendar />
                   Calendario
                 </SidebarMenuButton>
@@ -155,46 +155,6 @@ export function AppSidebar() {
                       </Link>
                     </SidebarMenuItem>
                   )}
-                 {profile.role !== 'user-technicians' && (
-                    <SidebarMenuItem>
-                      <Link href="/forms/warranty" passHref>
-                        <SidebarMenuButton isActive={pathname.startsWith('/forms/warranty')}>
-                          <ShieldCheck />
-                          Garantía
-                        </SidebarMenuButton>
-                      </Link>
-                    </SidebarMenuItem>
-                  )}
-                {profile.role !== 'user-technicians' && (
-                  <SidebarMenuItem>
-                    <Link href="/forms/safety-compliance" passHref>
-                      <SidebarMenuButton isActive={pathname.startsWith('/forms/safety-compliance')}>
-                        <LifeBuoy />
-                        Cumplimiento de Seguridad
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                )}
-                {profile.role !== 'user-technicians' && (
-                  <SidebarMenuItem>
-                    <Link href="/forms/fluid-analysis" passHref>
-                      <SidebarMenuButton isActive={pathname.startsWith('/forms/fluid-analysis')}>
-                        <FlaskConical />
-                        Análisis de Fluidos
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                )}
-                 {profile.role !== 'user-technicians' && (
-                  <SidebarMenuItem>
-                    <Link href="/forms/rental-agreement" passHref>
-                      <SidebarMenuButton isActive={pathname.startsWith('/forms/rental-agreement')}>
-                        <FileSignature />
-                        Contrato de Alquiler
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                 )}
                 <SidebarMenuItem>
                   <Link href="/forms/general-report" passHref>
                     <SidebarMenuButton isActive={pathname.startsWith('/forms/general-report')}>
@@ -204,6 +164,47 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuItem>
               </SidebarMenu>
+              {profile.role !== 'user-technicians' && (
+                <SidebarGroup>
+                  <SidebarGroupLabel>Contratos y Garantias</SidebarGroupLabel>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      <SidebarMenuItem>
+                        <Link href="/forms/warranty" passHref>
+                          <SidebarMenuButton isActive={pathname.startsWith('/forms/warranty')}>
+                            <ShieldCheck />
+                            Garantía
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <Link href="/forms/safety-compliance" passHref>
+                          <SidebarMenuButton isActive={pathname.startsWith('/forms/safety-compliance')}>
+                            <LifeBuoy />
+                            Cumplimiento de Seguridad
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <Link href="/forms/fluid-analysis" passHref>
+                          <SidebarMenuButton isActive={pathname.startsWith('/forms/fluid-analysis')}>
+                            <FlaskConical />
+                            Análisis de Fluidos
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <Link href="/forms/rental-agreement" passHref>
+                          <SidebarMenuButton isActive={pathname.startsWith('/forms/rental-agreement')}>
+                            <FileSignature />
+                            Contrato de Alquiler
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
