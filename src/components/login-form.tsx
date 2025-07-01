@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Facebook, Instagram, Youtube, X, Loader2 } from 'lucide-react';
+import { Facebook, Instagram, Youtube, X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -20,6 +21,7 @@ const WhatsAppIcon = () => (
 export function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
@@ -98,18 +100,23 @@ export function LoginForm() {
                 <fieldset className="border border-gray-400 rounded-lg px-3 relative">
                     <legend className="px-1 text-sm text-gray-600">Contraseña</legend>
                     <input
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-transparent py-2 border-0 focus:outline-none focus:ring-0 text-sm pr-8"
+                        className="w-full bg-transparent py-2 border-0 focus:outline-none focus:ring-0 text-sm pr-16"
                         autoComplete="current-password"
                         disabled={isLoading}
                     />
-                     {password && !isLoading && (
-                        <button type="button" onClick={() => setPassword('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                            <X className="h-5 w-5" />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+                        {password && !isLoading && (
+                            <button type="button" onClick={() => setPassword('')} className="text-gray-500 hover:text-gray-700">
+                                <X className="h-5 w-5" />
+                            </button>
+                        )}
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-500 hover:text-gray-700">
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
-                    )}
+                    </div>
                 </fieldset>
 
                 <Button type="submit" className="w-full bg-[#5d6a53] hover:bg-[#4a5542] text-white rounded-full font-semibold py-3 text-base" disabled={isLoading}>
