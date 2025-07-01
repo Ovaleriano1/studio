@@ -209,7 +209,8 @@ export function ReportsDisplay() {
         deliveryAddress: 'Dirección de Entrega',
         operatorName: 'Nombre del Operador',
         termsAccepted: 'Términos Aceptados',
-        photoDataUri: 'Evidencia Fotográfica',
+        initialPhotoDataUri: 'Foto Inicial del Equipo',
+        finalPhotoDataUri: 'Foto Final del Equipo',
         signatureDataUri: 'Firma del Cliente',
   };
 
@@ -298,7 +299,7 @@ export function ReportsDisplay() {
         if (key === 'id' || key === 'formType' || key === 'createdAt' || value === null || value === undefined || value === '') continue;
 
         const label = (keyTranslations[key] || key) + ':';
-        const formattedValue = (key === 'photoDataUri' || key === 'signatureDataUri') ? value : renderDetailValue(key, value);
+        const formattedValue = key.endsWith('DataUri') ? value : renderDetailValue(key, value);
         addField(label, formattedValue);
     }
 
@@ -388,7 +389,7 @@ export function ReportsDisplay() {
                     if (key === 'id' || key === 'formType' || key === 'createdAt' || value === null || value === undefined || value === '') return null;
                     
                     const displayKey = keyTranslations[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
-                    const isImageField = key === 'photoDataUri' || key === 'signatureDataUri';
+                    const isImageField = key.endsWith('DataUri');
 
                     if (isEditing) {
                         const isUneditable = typeof value === 'boolean' || (typeof value === 'string' && isValid(new Date(value)) && value.includes('T')) || isImageField;

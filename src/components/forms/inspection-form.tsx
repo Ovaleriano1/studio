@@ -29,6 +29,8 @@ const inspectionFormSchema = z.object({
   date: z.date({ required_error: 'Se requiere una fecha.' }),
   equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
   location: z.string().min(2, { message: 'La ubicación debe tener al menos 2 caracteres.' }),
+  initialPhotoDataUri: z.string().optional(),
+  finalPhotoDataUri: z.string().optional(),
   overallCondition: z.enum(['good', 'fair', 'poor'], { required_error: 'Por favor seleccione la condición general.' }),
   fluidLevels: z.enum(['ok', 'low', 'na'], { required_error: 'Por favor seleccione el estado de los niveles de fluido.' }),
   brakeSystem: z.enum(['ok', 'adjustment_needed', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema de frenos.' }),
@@ -39,7 +41,6 @@ const inspectionFormSchema = z.object({
   notes: z.string().min(10, { message: 'Por favor provea algunas notas (mínimo 10 caracteres).' }).max(500),
   safetyEquipment: z.boolean().default(false).optional(),
   passedInspection: z.boolean().default(false).optional(),
-  photoDataUri: z.string().optional(),
 });
 
 type InspectionFormValues = z.infer<typeof inspectionFormSchema>;
@@ -60,13 +61,16 @@ export function InspectionForm() {
     },
   });
 
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraState, setCameraState] = useState<{ isOpen: boolean; targetField: 'initial' | 'final' | null }>({
+    isOpen: false,
+    targetField: null,
+  });
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (isCameraOpen) {
+    if (cameraState.isOpen) {
       const getCameraPermission = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -86,17 +90,20 @@ export function InspectionForm() {
       };
       getCameraPermission();
     } else {
-      // Cleanup: stop video stream when dialog is closed
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
         videoRef.current.srcObject = null;
       }
     }
-  }, [isCameraOpen, toast]);
+  }, [cameraState.isOpen, toast]);
+
+  const openCamera = (targetField: 'initial' | 'final') => {
+    setCameraState({ isOpen: true, targetField });
+  };
 
   const handleTakePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && cameraState.targetField) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -104,8 +111,11 @@ export function InspectionForm() {
       const context = canvas.getContext('2d');
       context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
       const dataUri = canvas.toDataURL('image/jpeg');
-      form.setValue('photoDataUri', dataUri);
-      setIsCameraOpen(false);
+      
+      const fieldName = cameraState.targetField === 'initial' ? 'initialPhotoDataUri' : 'finalPhotoDataUri';
+      form.setValue(fieldName, dataUri);
+      
+      setCameraState({ isOpen: false, targetField: null });
     }
   };
 
@@ -131,7 +141,47 @@ export function InspectionForm() {
     }
   }
 
-  const photoDataUri = form.watch('photoDataUri');
+  const initialPhotoDataUri = form.watch('initialPhotoDataUri');
+  const finalPhotoDataUri = form.watch('finalPhotoDataUri');
+
+  const PhotoCaptureCard = ({
+    label,
+    fieldValue,
+    onButtonClick,
+    onClear,
+  }: {
+    label: string;
+    fieldValue: string | undefined;
+    onButtonClick: () => void;
+    onClear: () => void;
+  }) => (
+    <Card>
+      <CardContent className="p-4">
+        {fieldValue ? (
+          <div className="relative w-full max-w-xs mx-auto">
+            <Image src={fieldValue} alt={label} width={400} height={300} className="rounded-md" />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-7 w-7"
+              onClick={onClear}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 text-center p-6 border-2 border-dashed rounded-md">
+            <p className="text-sm text-muted-foreground">No se ha añadido ninguna foto.</p>
+            <Button type="button" onClick={onButtonClick}>
+              <Camera className="mr-2 h-4 w-4" />
+              {label}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <>
@@ -147,214 +197,227 @@ export function InspectionForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <FormField
-                control={form.control}
-                name="inspectorName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre del Inspector</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Juan Pérez" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Inspección</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                <FormField
+                    control={form.control}
+                    name="inspectorName"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Nombre del Inspector</FormLabel>
                         <FormControl>
-                          <Button
-                            variant={'outline'}
-                            className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                          >
-                            {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
-                            <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
+                        <Input placeholder="Juan Pérez" {...field} />
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date('1900-01-01')}
-                          initialFocus
-                          locale={es}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="equipmentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ID del Equipo</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., VOLVO-A40G" {...field} className="font-code" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ubicación</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Patio Oeste" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="overallCondition"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Condición General</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione condición" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="good">Buena</SelectItem>
-                        <SelectItem value="fair">Regular</SelectItem>
-                        <SelectItem value="poor">Mala</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="fluidLevels"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Niveles de Fluido</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione estado de fluidos" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="low">Bajo / Necesita Relleno</SelectItem>
-                        <SelectItem value="na">N/A</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="brakeSystem"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sistema de Frenos</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione estado de frenos" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="adjustment_needed">Necesita Ajuste</SelectItem>
-                        <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="hydraulicSystem"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sistema Hidráulico</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione estado hidráulico" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="leaking">Fugas</SelectItem>
-                        <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="electricalSystem"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sistema Eléctrico</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione estado eléctrico" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="faulty">Componente Defectuoso</SelectItem>
-                        <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tireCondition"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Condición y Presión de Neumáticos</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Buena, 150 PSI" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="attachmentsCondition"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Condición de Accesorios (Opcional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Cuchara con desgaste menor" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                        <FormLabel>Fecha de Inspección</FormLabel>
+                        <Popover>
+                        <PopoverTrigger asChild>
+                            <FormControl>
+                            <Button
+                                variant={'outline'}
+                                className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                            >
+                                {field.value ? format(field.value, 'PPP', { locale: es }) : <span>Seleccione una fecha</span>}
+                                <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date('1900-01-01')}
+                            initialFocus
+                            locale={es}
+                            />
+                        </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="equipmentId"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>ID del Equipo</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., VOLVO-A40G" {...field} className="font-code" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Ubicación</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., Patio Oeste" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            </div>
+            
+            <div className="space-y-2">
+                <FormLabel>Evidencia Fotográfica Inicial</FormLabel>
+                <PhotoCaptureCard
+                    label="Agregar Foto Inicial"
+                    fieldValue={initialPhotoDataUri}
+                    onButtonClick={() => openCamera('initial')}
+                    onClear={() => form.setValue('initialPhotoDataUri', undefined)}
+                />
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-4">
+                <FormField
+                    control={form.control}
+                    name="overallCondition"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Condición General</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione condición" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="good">Buena</SelectItem>
+                            <SelectItem value="fair">Regular</SelectItem>
+                            <SelectItem value="poor">Mala</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="fluidLevels"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Niveles de Fluido</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione estado de fluidos" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="ok">OK</SelectItem>
+                            <SelectItem value="low">Bajo / Necesita Relleno</SelectItem>
+                            <SelectItem value="na">N/A</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="brakeSystem"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Sistema de Frenos</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione estado de frenos" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="ok">OK</SelectItem>
+                            <SelectItem value="adjustment_needed">Necesita Ajuste</SelectItem>
+                            <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="hydraulicSystem"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Sistema Hidráulico</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione estado hidráulico" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="ok">OK</SelectItem>
+                            <SelectItem value="leaking">Fugas</SelectItem>
+                            <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="electricalSystem"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Sistema Eléctrico</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Seleccione estado eléctrico" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="ok">OK</SelectItem>
+                            <SelectItem value="faulty">Componente Defectuoso</SelectItem>
+                            <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="tireCondition"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Condición y Presión de Neumáticos</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., Buena, 150 PSI" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="attachmentsCondition"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Condición de Accesorios (Opcional)</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., Cuchara con desgaste menor" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
             </div>
             <FormField
               control={form.control}
@@ -375,37 +438,17 @@ export function InspectionForm() {
               )}
             />
             
-            <div className="space-y-4">
-              <FormLabel>Evidencia Fotográfica</FormLabel>
-              <Card>
-                <CardContent className="p-4">
-                  {photoDataUri ? (
-                    <div className="relative w-full max-w-xs mx-auto">
-                      <Image src={photoDataUri} alt="Evidencia" width={400} height={300} className="rounded-md" />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 h-7 w-7"
-                        onClick={() => form.setValue('photoDataUri', undefined)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 text-center p-6 border-2 border-dashed rounded-md">
-                      <p className="text-sm text-muted-foreground">No se ha añadido ninguna foto.</p>
-                       <Button type="button" onClick={() => setIsCameraOpen(true)}>
-                        <Camera className="mr-2 h-4 w-4" />
-                        Agregar Foto
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <div className="space-y-2">
+                <FormLabel>Evidencia Fotográfica Final</FormLabel>
+                <PhotoCaptureCard
+                    label="Agregar Foto Final"
+                    fieldValue={finalPhotoDataUri}
+                    onButtonClick={() => openCamera('final')}
+                    onClear={() => form.setValue('finalPhotoDataUri', undefined)}
+                />
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 pt-4">
               <FormField
                 control={form.control}
                 name="safetyEquipment"
@@ -452,7 +495,7 @@ export function InspectionForm() {
       </CardContent>
     </Card>
 
-    <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+    <Dialog open={cameraState.isOpen} onOpenChange={(open) => setCameraState({ ...cameraState, isOpen: open })}>
         <DialogContent>
             <DialogHeader>
             <DialogTitle>Tomar Foto</DialogTitle>
@@ -470,7 +513,7 @@ export function InspectionForm() {
                 )}
             </div>
             <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCameraOpen(false)}>Cancelar</Button>
+                <Button variant="outline" onClick={() => setCameraState({ isOpen: false, targetField: null })}>Cancelar</Button>
                 <Button onClick={handleTakePhoto} disabled={!hasCameraPermission}>Tomar Foto</Button>
             </DialogFooter>
         </DialogContent>
