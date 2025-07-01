@@ -15,6 +15,7 @@ export default async function CalendarPage() {
             if (report.scheduledDate) {
                 calendarEvents.push({
                     id: report.id,
+                    reportId: report.id,
                     date: report.scheduledDate,
                     title: report.clientName,
                     type: 'Visita Programada',
@@ -31,6 +32,7 @@ export default async function CalendarPage() {
             if (report.date) {
                  calendarEvents.push({
                     id: `${report.id}-service`,
+                    reportId: report.id,
                     date: report.date,
                     title: `Mantenimiento: ${report.equipmentId}`,
                     type: 'Mantenimiento',
@@ -43,6 +45,7 @@ export default async function CalendarPage() {
             if (report.nextServiceDate) {
                  calendarEvents.push({
                     id: `${report.id}-next-service`,
+                    reportId: report.id,
                     date: report.nextServiceDate,
                     title: `Próximo Servicio: ${report.equipmentId}`,
                     type: 'Próximo Servicio',
@@ -57,6 +60,7 @@ export default async function CalendarPage() {
             if (report.date) {
                 calendarEvents.push({
                     id: report.id,
+                    reportId: report.id,
                     date: report.date,
                     title: `Inspección: ${report.equipmentId}`,
                     type: 'Inspección',
@@ -71,6 +75,7 @@ export default async function CalendarPage() {
              if (report.date) {
                 calendarEvents.push({
                     id: report.id,
+                    reportId: report.id,
                     date: report.date,
                     title: `Orden de Trabajo: ${report.equipmentId}`,
                     type: 'Orden de Trabajo',
@@ -94,7 +99,7 @@ export default async function CalendarPage() {
         <AppHeader title="Calendario de Citas" />
         <main className="p-4 lg:p-6">
           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-             <TechnicianCalendar events={calendarEvents} />
+             <TechnicianCalendar events={calendarEvents} allReports={allReports} />
           </div>
         </main>
       </SidebarInset>
