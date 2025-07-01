@@ -14,7 +14,7 @@ import { es } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from './ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { ScrollArea } from './ui/scroll-area';
-import { RefreshCw, Edit, Trash2, AreaChart } from 'lucide-react';
+import { RefreshCw, Edit, Trash2, AreaChart, Download } from 'lucide-react';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -222,6 +222,68 @@ export function ReportsDisplay() {
     }
     return String(value);
   }
+  
+  const handleDownloadPdf = async () => {
+    if (!selectedReport) return;
+
+    const { default: jsPDF } = await import('jspdf');
+    const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+    });
+
+    // Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text(selectedReport.formType, doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`ID del Reporte: ${selectedReport.id}`, 15, 35);
+    const creationDate = format(new Date(selectedReport.createdAt), 'PPP p', { locale: es });
+    doc.text(`Fecha de Creación: ${creationDate}`, 15, 42);
+    
+    doc.line(15, 48, 195, 48); // separator
+
+    let yPos = 56;
+    const leftMargin = 15;
+    const valueXPos = 80;
+    const pageHeight = doc.internal.pageSize.height;
+    const bottomMargin = 15;
+
+    const addField = (label: string, value: string) => {
+        const labelWidth = valueXPos - leftMargin - 5;
+        const valueWidth = doc.internal.pageSize.width - valueXPos - leftMargin;
+
+        const labelLines = doc.splitTextToSize(label, labelWidth);
+        const valueLines = doc.splitTextToSize(value, valueWidth);
+        const lineHeight = Math.max(labelLines.length, valueLines.length) * 6;
+
+        if (yPos + lineHeight > pageHeight - bottomMargin) {
+            doc.addPage();
+            yPos = 20;
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, leftMargin, yPos);
+
+        doc.setFont('helvetica', 'normal');
+        doc.text(valueLines, valueXPos, yPos);
+        
+        yPos += lineHeight + 4;
+    };
+    
+    for (const [key, value] of Object.entries(selectedReport)) {
+        if (key === 'id' || key === 'formType' || key === 'createdAt' || value === null || value === undefined || value === '') continue;
+
+        const label = (keyTranslations[key] || key) + ':';
+        const formattedValue = renderDetailValue(key, value);
+        addField(label, formattedValue);
+    }
+
+    doc.save(`reporte-${selectedReport.id}.pdf`);
+  };
 
   const isLocked = ['Completado', 'Cancelado'].includes(selectedReport?.status);
 
@@ -388,6 +450,10 @@ export function ReportsDisplay() {
                             </Tooltip>
                         </TooltipProvider>
                       )}
+                      <Button variant="outline" onClick={handleDownloadPdf}>
+                        <Download className="mr-2 h-4 w-4" />
+                        PDF
+                      </Button>
                       {canDelete && (
                         <TooltipProvider>
                             <Tooltip>
