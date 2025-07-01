@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge, badgeVariants } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getReports, updateReport } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -17,28 +17,6 @@ import { RefreshCw, Lock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 const STATUS_OPTIONS = ['Pendiente', 'En Progreso', 'Esperando Repuestos', 'Completado', 'Cancelado'];
-
-const getStatusBadgeClassName = (status: string): string => {
-    switch (status) {
-        case 'Completado':
-            // Green for completed
-            return badgeVariants({ variant: 'default' });
-        case 'En Progreso':
-            // Orange for in progress
-            return "border-transparent bg-chart-5 text-accent-foreground hover:opacity-90";
-        case 'Pendiente':
-            // Yellow for pending
-            return "border-transparent bg-accent text-accent-foreground hover:bg-accent/90";
-        case 'Esperando Repuestos':
-            // A different orange/red for awaiting parts
-            return "border-transparent bg-chart-1 text-primary-foreground hover:opacity-90";
-        case 'Cancelado':
-            // Red for cancelled
-            return badgeVariants({ variant: 'destructive' });
-        default:
-            return badgeVariants({ variant: 'secondary' });
-    }
-};
 
 export function StatusDashboard() {
   const [reports, setReports] = useState<any[]>([]);
@@ -126,7 +104,7 @@ export function StatusDashboard() {
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="flex items-center gap-2 cursor-help">
-                                            <Badge className={getStatusBadgeClassName(report.status)}>{report.status}</Badge>
+                                            <Badge variant="secondary">{report.status}</Badge>
                                             <Lock className="h-4 w-4 text-muted-foreground" />
                                         </div>
                                     </TooltipTrigger>
@@ -146,14 +124,14 @@ export function StatusDashboard() {
                                 <SelectContent>
                                     {STATUS_OPTIONS.map((status) => (
                                     <SelectItem key={status} value={status}>
-                                        <Badge className={getStatusBadgeClassName(status)}>{status}</Badge>
+                                        {status}
                                     </SelectItem>
                                     ))}
                                 </SelectContent>
                                 </Select>
                             )
                             ) : (
-                            <Badge className={getStatusBadgeClassName(report.status)}>{report.status}</Badge>
+                            <Badge variant="secondary">{report.status}</Badge>
                             )}
                         </TableCell>
                         </TableRow>
