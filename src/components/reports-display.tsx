@@ -25,6 +25,7 @@ import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { type DateRange } from 'react-day-picker';
+import { Badge } from './ui/badge';
 
 export function ReportsDisplay() {
   const [reports, setReports] = useState<any[]>([]);
