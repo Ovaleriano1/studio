@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Play, Square, Timer, Pause } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { logWorkTimeAndNotify } from '@/app/actions';
+import { notifyTimerStart, notifyTimerPause, notifyTimerResume, notifyTimerStop } from '@/app/actions';
+import { useUserProfile } from '@/context/user-profile-context';
 
 type TimerState = 'idle' | 'running' | 'paused';
 
@@ -30,6 +31,7 @@ export function WorkTimer() {
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+  const { profile } = useUserProfile();
 
   const clearTimerInterval = () => {
     if (intervalRef.current) {
@@ -79,6 +81,11 @@ export function WorkTimer() {
     setTimerState('running');
     setElapsedTime(0);
     setActiveReportId(reportId);
+    
+    notifyTimerStart({ reportId, technicianName: profile.name }).catch(err => {
+        toast({ variant: 'destructive', title: "Error de Notificación", description: err.message });
+    });
+
     try {
       localStorage.setItem('workTimerState', 'running');
       localStorage.setItem('workTimerStartTime', now.toString());
@@ -89,6 +96,11 @@ export function WorkTimer() {
 
   const handlePause = () => {
     setTimerState('paused');
+    if (activeReportId) {
+        notifyTimerPause({ reportId: activeReportId, technicianName: profile.name }).catch(err => {
+            toast({ variant: 'destructive', title: "Error de Notificación", description: err.message });
+        });
+    }
     try {
       localStorage.setItem('workTimerState', 'paused');
       localStorage.setItem('workTimerElapsedTime', elapsedTime.toString());
@@ -99,6 +111,11 @@ export function WorkTimer() {
     const now = Date.now();
     setStartTime(now - elapsedTime * 1000);
     setTimerState('running');
+    if (activeReportId) {
+        notifyTimerResume({ reportId: activeReportId, technicianName: profile.name }).catch(err => {
+            toast({ variant: 'destructive', title: "Error de Notificación", description: err.message });
+        });
+    }
     try {
       localStorage.setItem('workTimerState', 'running');
       localStorage.setItem('workTimerStartTime', (now - elapsedTime * 1000).toString());
@@ -113,7 +130,7 @@ export function WorkTimer() {
     if (!finalReportId) return;
 
     try {
-        await logWorkTimeAndNotify({ reportId: finalReportId, elapsedTimeInSeconds: finalElapsedTime });
+        await notifyTimerStop({ reportId: finalReportId, elapsedTimeInSeconds: finalElapsedTime });
         toast({
             title: "Temporizador Detenido y Reportado",
             description: `Se ha reportado un tiempo de ${formatTime(finalElapsedTime)} para el reporte ${finalReportId}.`,

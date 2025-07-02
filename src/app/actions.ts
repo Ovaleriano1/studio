@@ -433,13 +433,107 @@ export async function saveRentalAgreement(reportData: any): Promise<string> {
     }
 }
 
-export async function logWorkTimeAndNotify({ reportId, elapsedTimeInSeconds }: { reportId: string, elapsedTimeInSeconds: number }) {
-  try {
-    const report = reports.find(r => r.id === reportId);
 
+// Helper function to simulate email notification
+async function sendNotificationEmail(subject: string, body: string) {
+  console.log('--- SIMULACIÓN DE ENVÍO DE CORREO ---');
+  console.log('Para: ohernandez@camosa.com, kgodoy@camosa.com');
+  console.log(`Asunto: ${subject}`);
+  console.log(body.trim());
+  console.log('------------------------------------');
+}
+
+// Helper to get basic report info
+function findReportForNotification(reportId: string) {
+    const report = reports.find(r => r.id === reportId);
     if (!report) {
       throw new Error(`Reporte con ID "${reportId}" no encontrado.`);
     }
+    return report;
+}
+
+export async function notifyTimerStart({ reportId, technicianName }: { reportId: string, technicianName: string }) {
+  try {
+    const report = findReportForNotification(reportId);
+    const emailBody = `
+      ===============================================
+      ** Temporizador INICIADO **
+      ===============================================
+
+      El temporizador ha sido iniciado para un reporte.
+
+      **Técnico:** ${technicianName}
+      **ID del Reporte:** ${report.id}
+      **Tipo de Formulario:** ${report.formType}
+      **Cliente:** ${report.clientName || 'No especificado'}
+      **Equipo:** ${report.equipmentId}
+      **Hora:** ${new Date().toLocaleString('es-HN')}
+    `;
+    await sendNotificationEmail(`Temporizador INICIADO para Reporte ${report.id}`, emailBody);
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'No se pudo notificar el inicio del temporizador.';
+    console.error('Error notifying timer start:', error);
+    throw new Error(errorMessage);
+  }
+}
+
+export async function notifyTimerPause({ reportId, technicianName }: { reportId: string, technicianName: string }) {
+    try {
+        const report = findReportForNotification(reportId);
+        const emailBody = `
+          ===============================================
+          ** Temporizador PAUSADO **
+          ===============================================
+    
+          El temporizador ha sido pausado.
+    
+          **Técnico:** ${technicianName}
+          **ID del Reporte:** ${report.id}
+          **Tipo de Formulario:** ${report.formType}
+          **Cliente:** ${report.clientName || 'No especificado'}
+          **Equipo:** ${report.equipmentId}
+          **Hora:** ${new Date().toLocaleString('es-HN')}
+        `;
+        await sendNotificationEmail(`Temporizador PAUSADO para Reporte ${report.id}`, emailBody);
+        return { success: true };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'No se pudo notificar la pausa del temporizador.';
+        console.error('Error notifying timer pause:', error);
+        throw new Error(errorMessage);
+    }
+}
+
+export async function notifyTimerResume({ reportId, technicianName }: { reportId: string, technicianName: string }) {
+    try {
+        const report = findReportForNotification(reportId);
+        const emailBody = `
+          ===============================================
+          ** Temporizador REANUDADO **
+          ===============================================
+    
+          El temporizador ha sido reanudado.
+    
+          **Técnico:** ${technicianName}
+          **ID del Reporte:** ${report.id}
+          **Tipo de Formulario:** ${report.formType}
+          **Cliente:** ${report.clientName || 'No especificado'}
+          **Equipo:** ${report.equipmentId}
+          **Hora:** ${new Date().toLocaleString('es-HN')}
+        `;
+        await sendNotificationEmail(`Temporizador REANUDADO para Reporte ${report.id}`, emailBody);
+        return { success: true };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'No se pudo notificar la reanudación del temporizador.';
+        console.error('Error notifying timer resume:', error);
+        throw new Error(errorMessage);
+    }
+}
+
+
+export async function notifyTimerStop({ reportId, elapsedTimeInSeconds }: { reportId: string, elapsedTimeInSeconds: number }) {
+  try {
+    const report = findReportForNotification(reportId);
 
     const hours = Math.floor(elapsedTimeInSeconds / 3600);
     const minutes = Math.floor((elapsedTimeInSeconds % 3600) / 60);
@@ -450,7 +544,7 @@ export async function logWorkTimeAndNotify({ reportId, elapsedTimeInSeconds }: {
 
     const emailBody = `
       ===============================================
-      ** Reporte de Horas de Trabajo **
+      ** Temporizador DETENIDO - Reporte de Horas **
       ===============================================
 
       Se ha registrado un nuevo tiempo de trabajo.
@@ -468,13 +562,8 @@ export async function logWorkTimeAndNotify({ reportId, elapsedTimeInSeconds }: {
       Este es un correo electrónico generado automáticamente.
     `;
 
-    // Simulate sending email
-    console.log('--- SIMULACIÓN DE ENVÍO DE CORREO ---');
-    console.log('Para: ohernandez@camosa.com, kgodoy@camosa.com');
-    console.log(`Asunto: Registro de Tiempo para Reporte ${report.id}`);
-    console.log(emailBody.trim());
-    console.log('------------------------------------');
-
+    await sendNotificationEmail(`Registro de Tiempo para Reporte ${report.id}`, emailBody);
+    
     return { success: true, message: 'El registro de tiempo ha sido notificado.' };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'No se pudo registrar el tiempo. Por favor, inténtelo de nuevo.';
