@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -51,6 +50,13 @@ const defaultUsers: Record<string, UserProfile> = {
     phone: '+504 8765-4321',
     avatar: 'https://placehold.co/100x100.png',
     role: 'supervisor',
+  },
+  'rvalerio@camosa.com': {
+    name: 'Rudy Valerio',
+    email: 'rvalerio@camosa.com',
+    phone: '+504 5555-1234',
+    avatar: 'https://placehold.co/100x100.png',
+    role: 'user-technicians',
   },
 };
 
