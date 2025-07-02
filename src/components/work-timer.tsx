@@ -135,32 +135,27 @@ export function WorkTimer() {
         </div>
         <div className="flex gap-4">
           {timerState === 'idle' && (
-            <Button size="lg" onClick={handleStart} className="w-40">
-              <Play className="mr-2" />
-              Comenzar
+            <Button size="icon" onClick={handleStart} className="h-12 w-12 rounded-full">
+              <Play className="h-6 w-6" />
             </Button>
           )}
           {timerState === 'running' && (
             <>
-              <Button size="lg" onClick={handlePause} variant="outline" className="w-40 border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-600">
-                <Pause className="mr-2" />
-                Pausar
+              <Button size="icon" onClick={handlePause} variant="outline" className="h-12 w-12 rounded-full border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-600">
+                <Pause className="h-6 w-6" />
               </Button>
-              <Button size="lg" onClick={handleStop} variant="destructive" className="w-40">
-                <Square className="mr-2" />
-                Detener
+              <Button size="icon" onClick={handleStop} variant="destructive" className="h-12 w-12 rounded-full">
+                <Square className="h-6 w-6" />
               </Button>
             </>
           )}
           {timerState === 'paused' && (
             <>
-              <Button size="lg" onClick={handleResume} className="w-40">
-                <Play className="mr-2" />
-                Reanudar
+              <Button size="icon" onClick={handleResume} className="h-12 w-12 rounded-full">
+                <Play className="h-6 w-6" />
               </Button>
-              <Button size="lg" onClick={handleStop} variant="destructive" className="w-40">
-                <Square className="mr-2" />
-                Detener
+              <Button size="icon" onClick={handleStop} variant="destructive" className="h-12 w-12 rounded-full">
+                <Square className="h-6 w-6" />
               </Button>
             </>
           )}
