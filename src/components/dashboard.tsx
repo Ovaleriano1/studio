@@ -5,26 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { FormSuggestion } from './form-suggestion';
 import { WorkTimer } from './work-timer';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-const recentForms = [
-  { id: 'FRM-001', type: 'Visita de Mantenimiento', equipment: 'MACK-LR-45', status: 'Completado', date: '2024-05-20' },
-  { id: 'FRM-002', type: 'Reporte de Inspección', equipment: 'CAT-D6', status: 'Completado', date: '2024-05-18' },
-  { id: 'FRM-003', type: 'Visita de Reparación', equipment: 'JOHN DEERE-8R', status: 'En Progreso', date: '2024-05-22' },
-  { id: 'FRM-004', type: 'Orden de Trabajo', equipment: 'VOLVO-A40G', status: 'Pendiente', date: '2024-05-23' },
-  { id: 'FRM-005', type: 'Visita de Mantenimiento', equipment: 'UD-CRONER', status: 'Completado', date: '2024-05-15' },
-];
-
-export function Dashboard() {
+export function Dashboard({ reports }: { reports: any[] }) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Completado':
-        return <Badge variant="default" className="bg-accent text-accent-foreground hover:bg-accent/90">Completado</Badge>;
+        return <Badge className="bg-green-600 text-primary-foreground hover:bg-green-600/90">Completado</Badge>;
       case 'En Progreso':
-        return <Badge variant="secondary">En Progreso</Badge>;
+        return <Badge className="bg-blue-600 text-primary-foreground hover:bg-blue-600/90">En Progreso</Badge>;
       case 'Pendiente':
-        return <Badge variant="outline">Pendiente</Badge>;
+        return <Badge className="bg-orange-500 text-primary-foreground hover:bg-orange-500/90">Pendiente</Badge>;
+      case 'Esperando Repuestos':
+        return <Badge className="bg-yellow-500 text-secondary-foreground hover:bg-yellow-500/90">Esperando Repuestos</Badge>;
+      case 'Cancelado':
+        return <Badge variant="destructive">Cancelado</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
@@ -56,13 +54,15 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentForms.map((form) => (
-                  <TableRow key={form.id}>
-                    <TableCell className="font-medium">{form.id}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{form.type}</TableCell>
-                    <TableCell className="font-code">{form.equipment}</TableCell>
-                    <TableCell>{getStatusBadge(form.status)}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{form.date}</TableCell>
+                {reports.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell className="font-medium">{report.id}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{report.formType}</TableCell>
+                    <TableCell className="font-code">{report.equipmentId}</TableCell>
+                    <TableCell>{getStatusBadge(report.status)}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {format(new Date(report.createdAt), 'PPP', { locale: es })}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
