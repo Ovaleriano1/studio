@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { UserProfileProvider } from "@/context/user-profile-context";
 
 export const metadata: Metadata = {
-  title: "CAMOSA App Tecnicos",
+  title: "CAMOSAPPTEC",
   description: "Heavy Machinery Maintenance App",
 };
 
