@@ -130,7 +130,7 @@ export function WorkTimer() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center gap-4 pt-6">
-        <div className={cn("text-4xl font-mono font-bold tracking-widest md:text-5xl", timerColorClass)}>
+        <div className={cn("text-4xl font-mono font-bold tracking-widest", timerColorClass)}>
           {formatTime(elapsedTime)}
         </div>
         <div className="flex gap-4">
