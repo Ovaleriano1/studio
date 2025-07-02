@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Play, Square, Timer, Pause } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { notifyTimerStart, notifyTimerPause, notifyTimerResume, notifyTimerStop } from '@/app/actions';
+import { notifyTimerStart, notifyTimerPause, notifyTimerResume, notifyTimerStop, getReportById } from '@/app/actions';
 import { useUserProfile } from '@/context/user-profile-context';
 
 type TimerState = 'idle' | 'running' | 'paused';
@@ -75,7 +75,27 @@ export function WorkTimer() {
     return clearTimerInterval;
   }, [timerState, startTime]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
+    const report = await getReportById(reportId);
+
+    if (!report) {
+        toast({
+            variant: 'destructive',
+            title: "Reporte no encontrado",
+            description: `El reporte con ID "${reportId}" no fue encontrado.`,
+        });
+        return;
+    }
+
+    if (['Completado', 'Cancelado'].includes(report.status)) {
+        toast({
+            variant: 'destructive',
+            title: "Acción No Permitida",
+            description: `El reporte "${reportId}" ya está ${report.status.toLowerCase()} y no se puede iniciar un temporizador.`,
+        });
+        return;
+    }
+
     const now = Date.now();
     setStartTime(now);
     setTimerState('running');

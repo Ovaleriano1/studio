@@ -187,6 +187,18 @@ export async function getReports(): Promise<any[]> {
   return JSON.parse(JSON.stringify(reports));
 }
 
+/**
+ * Fetches a single report by its ID from the in-memory store.
+ * @param reportId The ID of the report to fetch.
+ */
+export async function getReportById(reportId: string): Promise<any | null> {
+  const report = reports.find(r => r.id === reportId);
+  if (!report) return null;
+  // Return a copy to prevent direct mutation of the server-side array
+  return JSON.parse(JSON.stringify(report));
+}
+
+
 export async function updateReport(updatedReportData: any) {
   try {
     const reportIndex = reports.findIndex(r => r.id === updatedReportData.id);
