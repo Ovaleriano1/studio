@@ -4,9 +4,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Play, Square, Timer, Pause } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { logWorkTimeAndNotify } from '@/app/actions';
 
 type TimerState = 'idle' | 'running' | 'paused';
 
@@ -23,6 +26,8 @@ export function WorkTimer() {
   const [timerState, setTimerState] = useState<TimerState>('idle');
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [reportId, setReportId] = useState('');
+  const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
@@ -39,11 +44,13 @@ export function WorkTimer() {
       const savedState = localStorage.getItem('workTimerState') as TimerState | null;
       const savedStartTime = localStorage.getItem('workTimerStartTime');
       const savedElapsedTime = localStorage.getItem('workTimerElapsedTime');
+      const savedActiveReportId = localStorage.getItem('workTimerActiveReportId');
 
-      if (savedState && savedStartTime) {
+      if (savedState && savedStartTime && savedActiveReportId) {
         const start = parseInt(savedStartTime, 10);
         setStartTime(start);
         setTimerState(savedState);
+        setActiveReportId(savedActiveReportId);
         if (savedState === 'paused' && savedElapsedTime) {
           setElapsedTime(parseFloat(savedElapsedTime));
         }
@@ -71,9 +78,11 @@ export function WorkTimer() {
     setStartTime(now);
     setTimerState('running');
     setElapsedTime(0);
+    setActiveReportId(reportId);
     try {
       localStorage.setItem('workTimerState', 'running');
       localStorage.setItem('workTimerStartTime', now.toString());
+      localStorage.setItem('workTimerActiveReportId', reportId);
       localStorage.removeItem('workTimerElapsedTime');
     } catch (error) { console.error("Could not save timer state", error); }
   };
@@ -97,19 +106,38 @@ export function WorkTimer() {
     } catch (error) { console.error("Could not save timer state", error); }
   };
 
-  const handleStop = () => {
-    toast({
-      title: "Temporizador Detenido",
-      description: `Se ha registrado un tiempo de trabajo de ${formatTime(elapsedTime)}.`,
-    });
-    setTimerState('idle');
-    setElapsedTime(0);
-    setStartTime(null);
+  const handleStop = async () => {
+    const finalElapsedTime = elapsedTime;
+    const finalReportId = activeReportId;
+
+    if (!finalReportId) return;
+
     try {
-      localStorage.removeItem('workTimerState');
-      localStorage.removeItem('workTimerStartTime');
-      localStorage.removeItem('workTimerElapsedTime');
-    } catch(error) { console.error("Could not remove timer state", error); }
+        await logWorkTimeAndNotify({ reportId: finalReportId, elapsedTimeInSeconds: finalElapsedTime });
+        toast({
+            title: "Temporizador Detenido y Reportado",
+            description: `Se ha reportado un tiempo de ${formatTime(finalElapsedTime)} para el reporte ${finalReportId}.`,
+        });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error.';
+        toast({
+            variant: 'destructive',
+            title: "Error al Reportar",
+            description: errorMessage,
+        });
+    } finally {
+        setTimerState('idle');
+        setElapsedTime(0);
+        setStartTime(null);
+        setReportId('');
+        setActiveReportId(null);
+        try {
+            localStorage.removeItem('workTimerState');
+            localStorage.removeItem('workTimerStartTime');
+            localStorage.removeItem('workTimerElapsedTime');
+            localStorage.removeItem('workTimerActiveReportId');
+        } catch(error) { console.error("Could not remove timer state", error); }
+    }
   };
 
   const timerColorClass = {
@@ -117,6 +145,8 @@ export function WorkTimer() {
     paused: 'text-yellow-500',
     idle: 'text-destructive',
   }[timerState];
+
+  const isTimerActive = timerState === 'running' || timerState === 'paused';
 
   return (
     <Card className="h-full">
@@ -126,40 +156,59 @@ export function WorkTimer() {
           <CardTitle className="font-headline">Control de Horas</CardTitle>
         </div>
         <CardDescription>
-          Inicie el temporizador cuando comience a trabajar en una orden.
+          {isTimerActive
+              ? `Tiempo corriendo para el reporte: ${activeReportId}`
+              : "Ingrese el ID del reporte para iniciar el temporizador."
+          }
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center gap-4 pt-6">
         <div className={cn("text-4xl font-mono font-bold tracking-widest", timerColorClass)}>
           {formatTime(elapsedTime)}
         </div>
-        <div className="flex gap-4">
-          {timerState === 'idle' && (
-            <Button size="icon" onClick={handleStart} className="h-12 w-12 rounded-full">
-              <Play className="h-6 w-6" />
-            </Button>
-          )}
-          {timerState === 'running' && (
-            <>
-              <Button size="icon" onClick={handlePause} variant="outline" className="h-12 w-12 rounded-full border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-600">
-                <Pause className="h-6 w-6" />
+
+        {!isTimerActive && (
+          <div className="w-full max-w-xs space-y-4">
+              <div className="grid w-full items-center gap-1.5">
+                  <Label htmlFor="reportId">ID de Reporte</Label>
+                  <Input 
+                      id="reportId" 
+                      placeholder="Ej: OT-123, MR-456" 
+                      value={reportId} 
+                      onChange={(e) => setReportId(e.target.value)} 
+                  />
+              </div>
+              <Button onClick={handleStart} className="w-full" disabled={!reportId}>
+                  <Play className="mr-2 h-5 w-5" />
+                  Comenzar
               </Button>
-              <Button size="icon" onClick={handleStop} variant="destructive" className="h-12 w-12 rounded-full">
-                <Square className="h-6 w-6" />
-              </Button>
-            </>
-          )}
-          {timerState === 'paused' && (
-            <>
-              <Button size="icon" onClick={handleResume} className="h-12 w-12 rounded-full">
-                <Play className="h-6 w-6" />
-              </Button>
-              <Button size="icon" onClick={handleStop} variant="destructive" className="h-12 w-12 rounded-full">
-                <Square className="h-6 w-6" />
-              </Button>
-            </>
-          )}
-        </div>
+          </div>
+        )}
+
+        {isTimerActive && (
+             <div className="flex gap-4">
+                {timerState === 'running' && (
+                    <>
+                    <Button size="icon" onClick={handlePause} variant="outline" className="h-12 w-12 rounded-full border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-600">
+                        <Pause className="h-6 w-6" />
+                    </Button>
+                    <Button size="icon" onClick={handleStop} variant="destructive" className="h-12 w-12 rounded-full">
+                        <Square className="h-6 w-6" />
+                    </Button>
+                    </>
+                )}
+                {timerState === 'paused' && (
+                    <>
+                    <Button size="icon" onClick={handleResume} className="h-12 w-12 rounded-full">
+                        <Play className="h-6 w-6" />
+                    </Button>
+                    <Button size="icon" onClick={handleStop} variant="destructive" className="h-12 w-12 rounded-full">
+                        <Square className="h-6 w-6" />
+                    </Button>
+                    </>
+                )}
+            </div>
+        )}
       </CardContent>
     </Card>
   );

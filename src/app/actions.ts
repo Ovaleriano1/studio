@@ -432,3 +432,53 @@ export async function saveRentalAgreement(reportData: any): Promise<string> {
         throw new Error('No se pudo guardar el contrato de alquiler. Por favor, inténtelo de nuevo.');
     }
 }
+
+export async function logWorkTimeAndNotify({ reportId, elapsedTimeInSeconds }: { reportId: string, elapsedTimeInSeconds: number }) {
+  try {
+    const report = reports.find(r => r.id === reportId);
+
+    if (!report) {
+      throw new Error(`Reporte con ID "${reportId}" no encontrado.`);
+    }
+
+    const hours = Math.floor(elapsedTimeInSeconds / 3600);
+    const minutes = Math.floor((elapsedTimeInSeconds % 3600) / 60);
+    const seconds = Math.floor(elapsedTimeInSeconds % 60);
+    const formattedTime = [hours, minutes, seconds]
+      .map(v => v.toString().padStart(2, '0'))
+      .join(':');
+
+    const emailBody = `
+      ===============================================
+      ** Reporte de Horas de Trabajo **
+      ===============================================
+
+      Se ha registrado un nuevo tiempo de trabajo.
+
+      **Técnico:** ${report.technicianName || report.assignedTechnician || report.inspectorName || report.submittedBy || 'No especificado'}
+      **ID del Reporte:** ${report.id}
+      **Tipo de Formulario:** ${report.formType}
+      **Cliente:** ${report.clientName || 'No especificado'}
+      **Equipo:** ${report.equipmentId}
+
+      -----------------------------------------------
+      **Tiempo Registrado:** ${formattedTime} (HH:MM:SS)
+      -----------------------------------------------
+      
+      Este es un correo electrónico generado automáticamente.
+    `;
+
+    // Simulate sending email
+    console.log('--- SIMULACIÓN DE ENVÍO DE CORREO ---');
+    console.log('Para: ohernandez@camosa.com, kgodoy@camosa.com');
+    console.log(`Asunto: Registro de Tiempo para Reporte ${report.id}`);
+    console.log(emailBody.trim());
+    console.log('------------------------------------');
+
+    return { success: true, message: 'El registro de tiempo ha sido notificado.' };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'No se pudo registrar el tiempo. Por favor, inténtelo de nuevo.';
+    console.error('Error logging work time:', error);
+    throw new Error(errorMessage);
+  }
+}
