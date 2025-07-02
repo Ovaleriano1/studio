@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { FormSuggestion } from './form-suggestion';
+import { WorkTimer } from './work-timer';
 
 const recentForms = [
   { id: 'FRM-001', type: 'Visita de Mantenimiento', equipment: 'MACK-LR-45', status: 'Completado', date: '2024-05-20' },
@@ -28,10 +29,15 @@ export function Dashboard() {
   };
 
   return (
-    <div className="grid auto-rows-max items-start gap-4 lg:gap-8 md:grid-cols-2 lg:grid-cols-3">
-      <div className="grid auto-rows-max items-start gap-4 lg:gap-8 lg:col-span-2">
+    <div className="grid auto-rows-max items-start gap-4 lg:gap-8 lg:grid-cols-3">
+      <div className="lg:col-span-2">
         <FormSuggestion />
       </div>
+      
+      <div className="lg:col-span-1">
+         <WorkTimer />
+      </div>
+      
       <div className="lg:col-span-3">
         <Card>
           <CardHeader>
