@@ -29,7 +29,7 @@ const safetyFormSchema = z.object({
   firstAidKitCheck: z.boolean().default(false),
   emergencyStopCheck: z.boolean().default(false),
   ppeComplianceNotes: z.string().min(10, 'Por favor, proporcione notas sobre el cumplimiento de EPP.'),
-  overallSafetyRating: z.enum(['excellent', 'good', 'needs_improvement', 'unsafe'], { required_error: 'Por favor, seleccione una calificación de seguridad.' }),
+  overallSafetyRating: z.enum(['excelente', 'buena', 'necesita_mejora', 'inseguro'], { required_error: 'Por favor, seleccione una calificación de seguridad.' }),
 });
 
 type SafetyFormValues = z.infer<typeof safetyFormSchema>;
@@ -238,10 +238,10 @@ export function SafetyComplianceForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="excellent">Excelente</SelectItem>
-                        <SelectItem value="good">Buena</SelectItem>
-                        <SelectItem value="needs_improvement">Necesita Mejora</SelectItem>
-                        <SelectItem value="unsafe">Inseguro</SelectItem>
+                        <SelectItem value="excelente">Excelente</SelectItem>
+                        <SelectItem value="buena">Buena</SelectItem>
+                        <SelectItem value="necesita_mejora">Necesita Mejora</SelectItem>
+                        <SelectItem value="inseguro">Inseguro</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -26,10 +26,10 @@ const maintenanceFormSchema = z.object({
   date: z.date({ required_error: 'Se requiere una fecha.' }),
   equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
   hoursOnMachine: z.coerce.number().min(0, { message: 'Las horas deben ser un número positivo.' }),
-  serviceType: z.enum(['scheduled', 'emergency', 'preventive'], { required_error: 'Por favor seleccione un tipo de servicio.' }),
+  serviceType: z.enum(['programado', 'emergencia', 'preventivo'], { required_error: 'Por favor seleccione un tipo de servicio.' }),
   workOrderNumber: z.string().optional(),
   clientName: z.string().min(2, { message: "El nombre del cliente es requerido." }),
-  fluidCheck: z.enum(['ok', 'refill', 'na'], { required_error: 'Por favor seleccione el estado de los fluidos.' }),
+  fluidCheck: z.enum(['ok', 'relleno', 'na'], { required_error: 'Por favor seleccione el estado de los fluidos.' }),
   tirePressure: z.string().min(2, "Por favor ingrese la presión de neumáticos."),
   nextServiceDate: z.date().optional(),
   workPerformed: z.string().min(10, { message: 'Por favor describa el trabajo realizado (mínimo 10 caracteres).' }).max(500),
@@ -249,9 +249,9 @@ export function MaintenanceForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="scheduled">Programado</SelectItem>
-                        <SelectItem value="emergency">Emergencia</SelectItem>
-                        <SelectItem value="preventive">Preventivo</SelectItem>
+                        <SelectItem value="programado">Programado</SelectItem>
+                        <SelectItem value="emergencia">Emergencia</SelectItem>
+                        <SelectItem value="preventivo">Preventivo</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -298,7 +298,7 @@ export function MaintenanceForm() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="ok">OK</SelectItem>
-                        <SelectItem value="refill">Requiere Relleno</SelectItem>
+                        <SelectItem value="relleno">Requiere Relleno</SelectItem>
                         <SelectItem value="na">No Aplica</SelectItem>
                       </SelectContent>
                     </Select>

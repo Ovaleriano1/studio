@@ -23,12 +23,12 @@ const fluidAnalysisSchema = z.object({
   sampleDate: z.date({ required_error: 'Se requiere una fecha de muestra.' }),
   technicianName: z.string().min(2, { message: 'Se requiere el nombre del técnico.' }),
   equipmentId: z.string().min(1, { message: 'Se requiere el ID del equipo.' }),
-  fluidType: z.enum(['engine_oil', 'hydraulic_fluid', 'coolant', 'transmission_fluid'], { required_error: 'Por favor seleccione un tipo de fluido.' }),
+  fluidType: z.enum(['aceite_motor', 'fluido_hidraulico', 'refrigerante', 'fluido_transmision'], { required_error: 'Por favor seleccione un tipo de fluido.' }),
   sampleId: z.string().min(1, 'Se requiere el ID de la muestra.'),
   viscosityLevel: z.coerce.number().min(0, 'La viscosidad debe ser un valor positivo.'),
   contaminationLevel: z.string().min(1, 'Se requiere el nivel de contaminación.'),
   analysisSummary: z.string().min(10, 'Se requiere un resumen del análisis.'),
-  actionRequired: z.enum(['none', 'change_fluid', 'monitor', 'immediate_repair'], { required_error: 'Por favor seleccione una acción.' }),
+  actionRequired: z.enum(['ninguna', 'cambiar_fluido', 'monitorear', 'reparacion_inmediata'], { required_error: 'Por favor seleccione una acción.' }),
 });
 
 type FluidAnalysisValues = z.infer<typeof fluidAnalysisSchema>;
@@ -167,10 +167,10 @@ export function FluidAnalysisForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="engine_oil">Aceite de Motor</SelectItem>
-                        <SelectItem value="hydraulic_fluid">Fluido Hidráulico</SelectItem>
-                        <SelectItem value="coolant">Refrigerante</SelectItem>
-                        <SelectItem value="transmission_fluid">Fluido de Transmisión</SelectItem>
+                        <SelectItem value="aceite_motor">Aceite de Motor</SelectItem>
+                        <SelectItem value="fluido_hidraulico">Fluido Hidráulico</SelectItem>
+                        <SelectItem value="refrigerante">Refrigerante</SelectItem>
+                        <SelectItem value="fluido_transmision">Fluido de Transmisión</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -216,10 +216,10 @@ export function FluidAnalysisForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">Ninguna</SelectItem>
-                        <SelectItem value="monitor">Monitorear</SelectItem>
-                        <SelectItem value="change_fluid">Cambiar Fluido</SelectItem>
-                        <SelectItem value="immediate_repair">Reparación Inmediata Necesaria</SelectItem>
+                        <SelectItem value="ninguna">Ninguna</SelectItem>
+                        <SelectItem value="monitorear">Monitorear</SelectItem>
+                        <SelectItem value="cambiar_fluido">Cambiar Fluido</SelectItem>
+                        <SelectItem value="reparacion_inmediata">Reparación Inmediata Necesaria</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

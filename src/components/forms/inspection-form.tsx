@@ -31,11 +31,11 @@ const inspectionFormSchema = z.object({
   location: z.string().min(2, { message: 'La ubicación debe tener al menos 2 caracteres.' }),
   initialPhotoDataUri: z.string().optional(),
   finalPhotoDataUri: z.string().optional(),
-  overallCondition: z.enum(['good', 'fair', 'poor'], { required_error: 'Por favor seleccione la condición general.' }),
-  fluidLevels: z.enum(['ok', 'low', 'na'], { required_error: 'Por favor seleccione el estado de los niveles de fluido.' }),
-  brakeSystem: z.enum(['ok', 'adjustment_needed', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema de frenos.' }),
-  hydraulicSystem: z.enum(['ok', 'leaking', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema hidráulico.' }),
-  electricalSystem: z.enum(['ok', 'faulty', 'repair_needed'], { required_error: 'Por favor seleccione el estado del sistema eléctrico.' }),
+  overallCondition: z.enum(['buena', 'regular', 'mala'], { required_error: 'Por favor seleccione la condición general.' }),
+  fluidLevels: z.enum(['ok', 'bajo', 'na'], { required_error: 'Por favor seleccione el estado de los niveles de fluido.' }),
+  brakeSystem: z.enum(['ok', 'necesita_ajuste', 'necesita_reparacion'], { required_error: 'Por favor seleccione el estado del sistema de frenos.' }),
+  hydraulicSystem: z.enum(['ok', 'fugas', 'necesita_reparacion'], { required_error: 'Por favor seleccione el estado del sistema hidráulico.' }),
+  electricalSystem: z.enum(['ok', 'defectuoso', 'necesita_reparacion'], { required_error: 'Por favor seleccione el estado del sistema eléctrico.' }),
   tireCondition: z.string().min(2, { message: 'Por favor describa la condición de los neumáticos.'}),
   attachmentsCondition: z.string().optional(),
   notes: z.string().min(10, { message: 'Por favor provea algunas notas (mínimo 10 caracteres).' }).max(500),
@@ -295,9 +295,9 @@ export function InspectionForm() {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            <SelectItem value="good">Buena</SelectItem>
-                            <SelectItem value="fair">Regular</SelectItem>
-                            <SelectItem value="poor">Mala</SelectItem>
+                            <SelectItem value="buena">Buena</SelectItem>
+                            <SelectItem value="regular">Regular</SelectItem>
+                            <SelectItem value="mala">Mala</SelectItem>
                         </SelectContent>
                         </Select>
                         <FormMessage />
@@ -318,7 +318,7 @@ export function InspectionForm() {
                         </FormControl>
                         <SelectContent>
                             <SelectItem value="ok">OK</SelectItem>
-                            <SelectItem value="low">Bajo / Necesita Relleno</SelectItem>
+                            <SelectItem value="bajo">Bajo / Necesita Relleno</SelectItem>
                             <SelectItem value="na">N/A</SelectItem>
                         </SelectContent>
                         </Select>
@@ -340,8 +340,8 @@ export function InspectionForm() {
                         </FormControl>
                         <SelectContent>
                             <SelectItem value="ok">OK</SelectItem>
-                            <SelectItem value="adjustment_needed">Necesita Ajuste</SelectItem>
-                            <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
+                            <SelectItem value="necesita_ajuste">Necesita Ajuste</SelectItem>
+                            <SelectItem value="necesita_reparacion">Necesita Reparación</SelectItem>
                         </SelectContent>
                         </Select>
                         <FormMessage />
@@ -362,8 +362,8 @@ export function InspectionForm() {
                         </FormControl>
                         <SelectContent>
                             <SelectItem value="ok">OK</SelectItem>
-                            <SelectItem value="leaking">Fugas</SelectItem>
-                            <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
+                            <SelectItem value="fugas">Fugas</SelectItem>
+                            <SelectItem value="necesita_reparacion">Necesita Reparación</SelectItem>
                         </SelectContent>
                         </Select>
                         <FormMessage />
@@ -384,8 +384,8 @@ export function InspectionForm() {
                         </FormControl>
                         <SelectContent>
                             <SelectItem value="ok">OK</SelectItem>
-                            <SelectItem value="faulty">Componente Defectuoso</SelectItem>
-                            <SelectItem value="repair_needed">Necesita Reparación</SelectItem>
+                            <SelectItem value="defectuoso">Componente Defectuoso</SelectItem>
+                            <SelectItem value="necesita_reparacion">Necesita Reparación</SelectItem>
                         </SelectContent>
                         </Select>
                         <FormMessage />

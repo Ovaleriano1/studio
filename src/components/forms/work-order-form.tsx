@@ -27,8 +27,8 @@ const workOrderFormSchema = z.object({
   reportedBy: z.string().min(2, { message: "Se requiere el nombre de quien reporta." }),
   issueDescription: z.string().min(10, { message: 'Por favor describa el problema (mínimo 10 caracteres).' }).max(500),
   assignedTechnician: z.string().min(2, { message: 'El nombre del técnico debe tener al menos 2 caracteres.' }),
-  status: z.enum(['pending', 'in-progress', 'completed'], { required_error: 'Por favor seleccione un estado.' }),
-  priority: z.enum(['low', 'medium', 'high', 'urgent'], { required_error: 'Por favor seleccione un nivel de prioridad.' }),
+  status: z.enum(['pendiente', 'en_progreso', 'completado'], { required_error: 'Por favor seleccione un estado.' }),
+  priority: z.enum(['baja', 'media', 'alta', 'urgente'], { required_error: 'Por favor seleccione un nivel de prioridad.' }),
   estimatedHours: z.coerce.number().min(0).optional(),
   requiredParts: z.string().optional(),
 });
@@ -46,8 +46,8 @@ export function WorkOrderForm() {
       reportedBy: '',
       issueDescription: '',
       assignedTechnician: '',
-      status: 'pending',
-      priority: 'medium',
+      status: 'pendiente',
+      priority: 'media',
       estimatedHours: 0,
       requiredParts: ''
     },
@@ -199,10 +199,10 @@ export function WorkOrderForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="low">Baja</SelectItem>
-                        <SelectItem value="medium">Media</SelectItem>
-                        <SelectItem value="high">Alta</SelectItem>
-                        <SelectItem value="urgent">Urgente</SelectItem>
+                        <SelectItem value="baja">Baja</SelectItem>
+                        <SelectItem value="media">Media</SelectItem>
+                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="urgente">Urgente</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -222,9 +222,9 @@ export function WorkOrderForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="pending">Pendiente</SelectItem>
-                        <SelectItem value="in-progress">En Progreso</SelectItem>
-                        <SelectItem value="completed">Completada</SelectItem>
+                        <SelectItem value="pendiente">Pendiente</SelectItem>
+                        <SelectItem value="en_progreso">En Progreso</SelectItem>
+                        <SelectItem value="completado">Completada</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

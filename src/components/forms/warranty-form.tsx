@@ -31,8 +31,8 @@ const warrantyFormSchema = z.object({
   invoiceNumber: z.string().min(1, { message: 'Se requiere el número de factura.' }),
   partNumberFailed: z.string().min(1, 'Se requiere el número de parte que falló.'),
   partNumberReplaced: z.string().min(1, 'Se requiere el número de parte de reemplazo.'),
-  claimType: z.enum(['part', 'labor', 'both'], { required_error: 'Por favor seleccione un tipo de reclamo.' }),
-  claimStatus: z.enum(['submitted', 'under-review', 'approved', 'denied'], { required_error: 'Por favor seleccione un estado de reclamo.' }),
+  claimType: z.enum(['parte', 'mano_de_obra', 'ambos'], { required_error: 'Por favor seleccione un tipo de reclamo.' }),
+  claimStatus: z.enum(['enviado', 'en_revision', 'aprobado', 'denegado'], { required_error: 'Por favor seleccione un estado de reclamo.' }),
   claimDescription: z.string().min(10, { message: 'Por favor describa el reclamo (mínimo 10 caracteres).' }).max(500),
   technicianNotes: z.string().optional(),
 });
@@ -53,7 +53,7 @@ export function WarrantyForm() {
       invoiceNumber: '',
       partNumberFailed: '',
       partNumberReplaced: '',
-      claimStatus: 'submitted',
+      claimStatus: 'enviado',
       claimDescription: '',
       technicianNotes: '',
     },
@@ -291,9 +291,9 @@ export function WarrantyForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="part">Solo Parte</SelectItem>
-                        <SelectItem value="labor">Solo Mano de Obra</SelectItem>
-                        <SelectItem value="both">Parte y Mano de Obra</SelectItem>
+                        <SelectItem value="parte">Solo Parte</SelectItem>
+                        <SelectItem value="mano_de_obra">Solo Mano de Obra</SelectItem>
+                        <SelectItem value="ambos">Parte y Mano de Obra</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -313,10 +313,10 @@ export function WarrantyForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="submitted">Enviado</SelectItem>
-                        <SelectItem value="under-review">En Revisión</SelectItem>
-                        <SelectItem value="approved">Aprobado</SelectItem>
-                        <SelectItem value="denied">Rechazado</SelectItem>
+                        <SelectItem value="enviado">Enviado</SelectItem>
+                        <SelectItem value="en_revision">En Revisión</SelectItem>
+                        <SelectItem value="aprobado">Aprobado</SelectItem>
+                        <SelectItem value="denegado">Rechazado</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

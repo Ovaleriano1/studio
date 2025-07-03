@@ -38,7 +38,7 @@ const repairFormSchema = z.object({
   partsUsed: z.string().optional(),
   testingNotes: z.string().optional(),
   finalPhotoDataUri: z.string().optional(),
-  finalStatus: z.enum(['repaired', 'needs_follow_up', 'awaiting_parts']),
+  finalStatus: z.enum(['reparado', 'necesita_seguimiento', 'esperando_repuestos']),
   repairCompleted: z.boolean().default(false),
   followUpRequired: z.boolean().default(false),
   signatureDataUri: z.string().optional(),
@@ -347,7 +347,6 @@ export function RepairForm() {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date('1900-01-01')}
                           initialFocus
                           locale={es}
                         />
@@ -554,9 +553,9 @@ export function RepairForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="repaired">Reparado y Operacional</SelectItem>
-                        <SelectItem value="needs_follow_up">Necesita Seguimiento</SelectItem>
-                        <SelectItem value="awaiting_parts">Esperando Repuestos</SelectItem>
+                        <SelectItem value="reparado">Reparado y Operacional</SelectItem>
+                        <SelectItem value="necesita_seguimiento">Necesita Seguimiento</SelectItem>
+                        <SelectItem value="esperando_repuestos">Esperando Repuestos</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

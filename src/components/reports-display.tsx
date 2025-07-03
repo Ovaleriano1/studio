@@ -268,21 +268,21 @@ export function ReportsDisplay() {
   };
 
   const valueTranslations: { [key: string]: { [value: string]: string } } = {
-    serviceType: { scheduled: 'Programado', emergency: 'Emergencia', preventive: 'Preventivo' },
-    fluidCheck: { ok: 'OK', refill: 'Requiere Relleno', na: 'No Aplica' },
-    overallCondition: { good: 'Buena', fair: 'Regular', poor: 'Mala' },
-    fluidLevels: { ok: 'OK', low: 'Bajo / Necesita Relleno', na: 'N/A' },
-    brakeSystem: { ok: 'OK', adjustment_needed: 'Necesita Ajuste', repair_needed: 'Necesita Reparación' },
-    hydraulicSystem: { ok: 'OK', leaking: 'Fugas', repair_needed: 'Necesita Reparación' },
-    electricalSystem: { ok: 'OK', faulty: 'Componente Defectuoso', repair_needed: 'Necesita Reparación' },
-    finalStatus: { repaired: 'Reparado y Operacional', needs_follow_up: 'Necesita Seguimiento', awaiting_parts: 'Esperando Repuestos' },
-    priority: { low: 'Baja', medium: 'Media', high: 'Alta', urgent: 'Urgente' },
-    status: { pending: 'Pendiente', 'in-progress': 'En Progreso', completed: 'Completado' },
-    claimType: { part: 'Solo Parte', labor: 'Solo Mano de Obra', both: 'Parte y Mano de Obra' },
-    claimStatus: { submitted: 'Enviado', 'under-review': 'En Revisión', approved: 'Aprobado', denied: 'Rechazado' },
-    overallSafetyRating: { excellent: 'Excelente', good: 'Buena', needs_improvement: 'Necesita Mejora', unsafe: 'Inseguro' },
-    fluidType: { engine_oil: 'Aceite de Motor', hydraulic_fluid: 'Fluido Hidráulico', coolant: 'Refrigerante', transmission_fluid: 'Fluido de Transmisión' },
-    actionRequired: { none: 'Ninguna', monitor: 'Monitorear', change_fluid: 'Cambiar Fluido', immediate_repair: 'Reparación Inmediata' },
+    serviceType: { programado: 'Programado', emergencia: 'Emergencia', preventivo: 'Preventivo' },
+    fluidCheck: { ok: 'OK', relleno: 'Requiere Relleno', na: 'No Aplica' },
+    overallCondition: { buena: 'Buena', regular: 'Regular', mala: 'Mala' },
+    fluidLevels: { ok: 'OK', bajo: 'Bajo / Necesita Relleno', na: 'N/A' },
+    brakeSystem: { ok: 'OK', necesita_ajuste: 'Necesita Ajuste', necesita_reparacion: 'Necesita Reparación' },
+    hydraulicSystem: { ok: 'OK', fugas: 'Fugas', necesita_reparacion: 'Necesita Reparación' },
+    electricalSystem: { ok: 'OK', defectuoso: 'Componente Defectuoso', necesita_reparacion: 'Necesita Reparación' },
+    finalStatus: { reparado: 'Reparado y Operacional', necesita_seguimiento: 'Necesita Seguimiento', esperando_repuestos: 'Esperando Repuestos' },
+    priority: { baja: 'Baja', media: 'Media', alta: 'Alta', urgente: 'Urgente' },
+    status: { pendiente: 'Pendiente', en_progreso: 'En Progreso', completado: 'Completado' },
+    claimType: { parte: 'Solo Parte', mano_de_obra: 'Solo Mano de Obra', ambos: 'Parte y Mano de Obra' },
+    claimStatus: { enviado: 'Enviado', en_revision: 'En Revisión', aprobado: 'Aprobado', denegado: 'Rechazado' },
+    overallSafetyRating: { excelente: 'Excelente', buena: 'Buena', necesita_mejora: 'Necesita Mejora', inseguro: 'Inseguro' },
+    fluidType: { aceite_motor: 'Aceite de Motor', fluido_hidraulico: 'Fluido Hidráulico', refrigerante: 'Refrigerante', fluido_transmision: 'Fluido de Transmisión' },
+    actionRequired: { ninguna: 'Ninguna', monitorear: 'Monitorear', cambiar_fluido: 'Cambiar Fluido', reparacion_inmediata: 'Reparación Inmediata' },
   };
 
   const renderDetailValue = (key: string, value: any) => {
