@@ -265,6 +265,7 @@ export function ReportsDisplay() {
         dailyRate: 'Tarifa Diaria ($)', insuranceProvider: 'Proveedor de Seguros', deliveryAddress: 'Dirección de Entrega',
         operatorName: 'Nombre del Operador', termsAccepted: 'Términos Aceptados', initialPhotoDataUri: 'Foto Inicial del Equipo',
         finalPhotoDataUri: 'Foto Final del Equipo', signatureDataUri: 'Firma del Cliente',
+        signatureClientDataUri: 'Firma del Cliente', signatureAdvisorDataUri: 'Firma del Asesor de Renta'
   };
 
   const valueTranslations: { [key: string]: { [value: string]: string } } = {

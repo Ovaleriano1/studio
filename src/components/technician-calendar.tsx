@@ -69,7 +69,8 @@ const keyTranslations: { [key: string]: string } = {
     viscosityLevel: 'Nivel de Viscosidad', contaminationLevel: 'Nivel de Contaminación', analysisSummary: 'Resumen de Análisis',
     actionRequired: 'Acción Requerida', rentalStartDate: 'Inicio de Alquiler', rentalEndDate: 'Fin de Alquiler',
     dailyRate: 'Tarifa Diaria ($)', insuranceProvider: 'Proveedor de Seguros', deliveryAddress: 'Dirección de Entrega',
-    operatorName: 'Nombre del Operador', termsAccepted: 'Términos Aceptados'
+    operatorName: 'Nombre del Operador', termsAccepted: 'Términos Aceptados',
+    signatureClientDataUri: 'Firma del Cliente', signatureAdvisorDataUri: 'Firma del Asesor de Renta'
 };
 
 export function TechnicianCalendar({ events: rawEvents = [], allReports = [] }: TechnicianCalendarProps) {
