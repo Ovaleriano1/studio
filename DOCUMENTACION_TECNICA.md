@@ -1,8 +1,8 @@
 
 # Documentación Técnica: CAMOSAPPTEC
 
-**Versión del Documento:** 1.0
-**Fecha:** 2024-08-06
+**Versión del Documento:** 1.1
+**Fecha:** 2024-08-07
 
 ---
 
@@ -26,7 +26,6 @@ El alcance de la aplicación abarca las siguientes funcionalidades:
 
 **Fuera del Alcance (Limitaciones Actuales):**
 
-*   La aplicación utiliza un almacenamiento de datos en memoria, lo que significa que los datos se pierden al reiniciar el servidor. No está conectada a una base de datos persistente.
 *   Las notificaciones por correo electrónico son simuladas (se muestran en la consola del servidor) y no se envían correos reales.
 
 ---
@@ -38,6 +37,7 @@ El alcance de la aplicación abarca las siguientes funcionalidades:
 *   Documentación oficial de ShadCN UI: [https://ui.shadcn.com/](https://ui.shadcn.com/)
 *   Documentación oficial de Tailwind CSS: [https://tailwindcss.com/docs](https://tailwindcss.com/docs)
 *   Documentación oficial de Genkit: [https://firebase.google.com/docs/genkit](https://firebase.google.com/docs/genkit)
+*   Documentación oficial de Cloud Firestore: [https://firebase.google.com/docs/firestore](https://firebase.google.com/docs/firestore)
 
 ---
 
@@ -50,19 +50,22 @@ El alcance de la aplicación abarca las siguientes funcionalidades:
 *   **Server Actions:** Funciones de Next.js que se ejecutan en el servidor y pueden ser llamadas directamente desde los componentes del cliente, facilitando las mutaciones de datos de forma segura.
 *   **Genkit y Gemini:** Genkit es un framework de Google para desarrollar aplicaciones de IA. La aplicación lo utiliza para interactuar con los modelos de lenguaje de Google (Gemini) y potenciar funciones como el diagnóstico y la sugerencia de formularios.
 *   **Tailwind CSS:** Framework de CSS "utility-first" que agiliza el diseño de interfaces aplicando clases directamente en el markup HTML.
+*   **Cloud Firestore:** Base de datos NoSQL, flexible y escalable de Google para aplicaciones móviles, web y de servidor. Almacena datos en documentos JSON-like organizados en colecciones.
 
 ### 4.2 CONCEPTOS GENERALES
 
 *   **Reporte:** Objeto de datos que representa cualquier formulario enviado en la aplicación (ej. un reporte de mantenimiento, una orden de trabajo).
 *   **Flujo de Genkit:** Una función definida con Genkit que encapsula una lógica de IA, como una llamada a un modelo de lenguaje.
 *   **Componente de Servidor (Server Component):** Un componente de React que se renderiza exclusivamente en el servidor. No tiene estado interactivo y ayuda a reducir el JavaScript enviado al navegador.
+*   **Colección (Firestore):** Un contenedor de documentos. Por ejemplo, una colección `reports` contiene todos los documentos de los reportes.
+*   **Documento (Firestore):** La unidad de almacenamiento en Firestore. Es un conjunto de pares clave-valor, similar a un objeto JSON.
 
 ### 4.3 PROCESOS DE ENTRADA Y SALIDA
 
 *   **Creación de Reportes:**
     *   **Entrada:** El usuario llena un formulario en la interfaz web.
-    *   **Proceso:** Al enviar, se invoca una Server Action (`save...Report`). Esta función valida los datos, crea un nuevo objeto de reporte con un ID y una fecha de creación, y lo añade al arreglo de datos en memoria.
-    *   **Salida:** La acción devuelve el ID del nuevo reporte. La interfaz se actualiza (revalida) para mostrar los datos más recientes.
+    *   **Proceso:** Al enviar, se invoca una Server Action (`save...Report`). Esta función valida los datos, crea un nuevo **documento** en la colección `reports` de **Cloud Firestore** y lo guarda. Firestore asigna un ID único al documento.
+    *   **Salida:** La acción devuelve el ID del nuevo documento. La interfaz se actualiza (revalida) para mostrar los datos más recientes.
 *   **Asistente de Diagnóstico (IA):**
     *   **Entrada:** El técnico introduce el modelo del equipo y una descripción del problema.
     *   **Proceso:** Se llama al flujo de Genkit `troubleshootEquipmentFlow`. Este flujo envía la información de entrada al modelo Gemini de Google, solicitando una respuesta estructurada (causas, pasos, partes).
@@ -87,41 +90,42 @@ El alcance de la aplicación abarca las siguientes funcionalidades:
 
 ## 6. DICCIONARIO DE DATOS
 
-La aplicación actualmente **no utiliza una base de datos tradicional**. En su lugar, simula una base de datos mediante un arreglo de objetos en memoria ubicado en `src/app/actions.ts`. Este almacenamiento es volátil.
+La aplicación utiliza **Cloud Firestore** como su base de datos principal. Firestore es una base de datos NoSQL, flexible y escalable, que almacena los datos en documentos (similares a JSON) organizados en colecciones.
 
 ### 6.1 MODELO ENTIDAD-RELACIÓN
 
-El modelo es simple y se centra en una entidad principal: **Reporte**.
-
-*   **Reporte:** Contiene todos los campos de los diferentes formularios. Un reporte está asociado a un **Usuario** (Técnico, Inspector, etc.) a través de campos como `technicianName`, `submittedBy`, etc.
+El modelo de datos se centra en una colección principal en Firestore llamada **`reports`**. Cada documento dentro de esta colección representa un reporte individual (mantenimiento, inspección, etc.). La relación con los usuarios se mantiene a través de campos como `technicianEmail` o `submittedBy`, que contendrían el identificador único del usuario.
 
 ### 6.2 DISTRIBUCIÓN FÍSICA Y LÓGICA DE BASE DE DATOS
 
-*   **Lógica:** Los datos se gestionan como una colección de objetos `Reporte`.
-*   **Física:** Los datos residen en la memoria RAM del servidor donde se ejecuta la aplicación (variable `reports` en `src/app/actions.ts`). No hay persistencia física.
+*   **Lógica:** Los datos se organizan en colecciones (ej. `reports`, `users`) que contienen documentos. Es un modelo de datos principalmente desnormalizado para optimizar la velocidad de las lecturas.
+*   **Física:** Cloud Firestore es un servicio totalmente gestionado por Google Cloud. La distribución física de los datos, la replicación entre múltiples regiones y el escalado son manejados automáticamente por Google, garantizando alta disponibilidad y baja latencia a nivel global.
 
 ### 6.3 TABLAS Y VISTAS
 
-*   **Tabla `reports` (simulada):** Es el arreglo en memoria que contiene todos los reportes. Los campos son una unión de todos los posibles campos de todos los formularios. No existen vistas de base de datos.
+*   **Colección `reports`:** Es la colección principal que contiene todos los documentos de reporte. No existen "vistas" en el sentido de SQL; las consultas se realizan directamente sobre la colección, pudiendo filtrar y ordenar los documentos de manera eficiente.
 
 ### 6.4 TRIGGERS
 
-No se utilizan triggers de base de datos.
+No se utilizan triggers de base de datos directamente, pero Firestore se integra con **Cloud Functions**, que pueden actuar como triggers. Por ejemplo, una función podría ejecutarse automáticamente cada vez que se crea un nuevo documento en la colección `reports` para enviar una notificación o procesar datos adicionales.
 
 ### 6.5 RESTRICCIONES ESPECIALES
 
-Existen restricciones implementadas a nivel de la lógica de la aplicación:
+Existen restricciones implementadas a nivel de la lógica de la aplicación y de la base de datos:
 
-*   No se puede editar o eliminar un reporte cuyo estado sea "Completado" o "Cancelado".
-*   No se puede iniciar el temporizador de control de horas para un reporte que ya esté "Completado" o "Cancelado".
+*   **A nivel de Aplicación:**
+    *   No se puede editar o eliminar un reporte cuyo estado sea "Completado" o "Cancelado".
+    *   No se puede iniciar el temporizador de control de horas para un reporte que ya esté "Completado" o "Cancelado".
+*   **A nivel de Base de Datos (Firestore Security Rules):**
+    *   Se utilizan reglas para asegurar que un usuario solo pueda leer o escribir los datos para los que tiene permiso explícito, basándose en su rol y autenticación.
 
 ### 6.6 FUNCIONES DE USUARIO, STORED PROCEDURES Y PAQUETES
 
-No se utilizan. Las **Server Actions** en `src/app/actions.ts` (ej. `updateReport`, `saveMaintenanceReport`) cumplen una función análoga a los procedimientos almacenados.
+No se utilizan procedimientos almacenados en el sentido tradicional de SQL. Las **Server Actions** de Next.js, que interactúan con Firestore, cumplen una función análoga, encapsulando la lógica de negocio para leer y escribir en la base de datos de forma segura.
 
 ### 6.7 TAREAS PROGRAMADAS
 
-No existen tareas programadas (cron jobs).
+No existen tareas programadas (cron jobs) en la aplicación. Para funcionalidades periódicas, se podría utilizar **Cloud Scheduler** en conjunto con **Cloud Functions**.
 
 ### 6.8 DATA TRANSFORMATION SERVICES (DTS)
 
@@ -137,7 +141,10 @@ El código fuente de la aplicación debe ser gestionado a través de un sistema 
 
 ### 7.2 BASE DE DATOS
 
-**No existe una política de respaldo de base de datos** porque los datos son volátiles y residen en memoria. **Recomendación Crítica:** Es imperativo migrar el almacenamiento de datos a una solución persistente y escalable como **Cloud Firestore** o **PostgreSQL**, y configurar políticas de respaldo automáticas y periódicas en dicha plataforma.
+**Cloud Firestore** ofrece varias estrategias de respaldo robustas:
+
+*   **Recuperación a un Momento Específico (PITR):** Firestore mantiene un registro continuo de los cambios, permitiendo restaurar la base de datos a cualquier punto en el tiempo dentro de los últimos 7 días. Esta función está habilitada por defecto.
+*   **Exportaciones e Importaciones:** Se pueden configurar exportaciones programadas de toda la base de datos o de colecciones específicas a un bucket de **Google Cloud Storage**. Estos respaldos pueden usarse para restaurar datos, migrarlos o para análisis.
 
 ---
 
@@ -145,6 +152,7 @@ El código fuente de la aplicación debe ser gestionado a través de un sistema 
 
 La aplicación se integra con los siguientes sistemas externos:
 
+*   **Cloud Firestore:** Es el sistema de base de datos principal para el almacenamiento persistente de todos los datos de la aplicación, como reportes y perfiles de usuario.
 *   **Google AI Platform:** A través de Genkit, la aplicación se comunica con las APIs de los modelos Gemini para potenciar las funcionalidades de Inteligencia Artificial.
 *   **Firebase Authentication:** Se utiliza para la autenticación y gestión de las credenciales de los usuarios.
 
@@ -156,7 +164,7 @@ La aplicación se integra con los siguientes sistemas externos:
 
 *   Node.js (versión 20 o superior recomendada).
 *   Gestor de paquetes `npm` (incluido con Node.js).
-*   Credenciales de un proyecto de Firebase con Authentication y Google AI habilitados.
+*   Credenciales de un proyecto de Firebase con Authentication, Cloud Firestore y Google AI habilitados.
 
 ### 9.2 DETALLES DEL PROCESO DE INSTALACIÓN
 
@@ -207,7 +215,7 @@ La aplicación está diseñada para ser desplegada en **Firebase App Hosting**, 
 *   **Servidor (Firebase App Hosting):** Ejecuta el servidor de Next.js. Se encarga de:
     *   Renderizar los Componentes de Servidor.
     *   Ejecutar las Server Actions para la lógica de negocio.
-    *   Gestionar el almacenamiento de datos en memoria (en el estado actual).
+    *   Gestionar la comunicación con **Cloud Firestore** para la persistencia de datos.
     *   Comunicarse con los servicios de Google (Firebase Auth, Google AI).
 
 La arquitectura es serverless, lo que significa que la infraestructura subyacente (servidores, escalado) es gestionada automáticamente por Google Cloud.
@@ -216,9 +224,10 @@ La arquitectura es serverless, lo que significa que la infraestructura subyacent
 
 ## 11. PROCESOS DE CONTINUIDAD Y CONTINGENCIA
 
-*   **Continuidad:** Firebase App Hosting proporciona alta disponibilidad y escalado automático, lo que garantiza la continuidad del servicio ante picos de tráfico.
+*   **Continuidad:** Firebase App Hosting y Cloud Firestore proporcionan alta disponibilidad y escalado automático, lo que garantiza la continuidad del servicio ante picos de tráfico.
 *   **Contingencia:**
-    *   **Punto Crítico de Fallo:** El principal riesgo es la **pérdida de datos** debido al almacenamiento en memoria. El plan de contingencia es migrar a una base de datos persistente como Firestore.
+    *   **Punto Crítico de Fallo:** La dependencia de los servicios de Google Cloud (Firebase Auth, Firestore, App Hosting) significa que una interrupción en estos servicios podría afectar la aplicación.
+    *   **Plan de Contingencia:** Google Cloud cuenta con una infraestructura globalmente redundante. La política de respaldo de Firestore (PITR y exportaciones) permite la restauración de datos en caso de una corrupción accidental o un error humano.
     *   **Recuperación del Servicio:** En caso de un fallo en el despliegue, Firebase App Hosting permite revertir a una versión anterior de la aplicación de manera rápida.
 
 ---
@@ -227,7 +236,7 @@ La arquitectura es serverless, lo que significa que la infraestructura subyacent
 
 ### 12.1 USUARIOS DE BASE DE DATOS
 
-No existen usuarios de base de datos directos. El acceso a los datos está mediado por la lógica de la aplicación (Server Actions).
+El acceso directo a la base de datos está controlado por las **Reglas de Seguridad de Firestore (Firestore Security Rules)**. Estas reglas definen quién puede leer, escribir y modificar los datos, basándose en la autenticación del usuario (Firebase Auth) y sus roles (almacenados como custom claims o en un documento de perfil). La lógica de la aplicación (Server Actions) interactúa con Firestore bajo estas reglas, garantizando un acceso seguro y controlado.
 
 ### 12.2 USUARIOS DE SISTEMA OPERATIVO
 
@@ -235,10 +244,11 @@ La aplicación se ejecuta en el entorno de Firebase App Hosting bajo una cuenta 
 
 ### 12.3 USUARIOS DE APLICACIONES
 
-Los perfiles de usuario y sus roles se gestionan en `src/context/user-profile-context.tsx`. Los roles definidos son:
+Los perfiles de usuario y sus roles se gestionan en `src/context/user-profile-context.tsx` y se sincronizan con **Firebase Authentication** y **Firestore**. Los roles definidos son:
 
 *   **Administrador (`admin`):** Acceso completo a todas las funcionalidades, incluyendo la creación de usuarios y la configuración del sistema.
 *   **Superusuario (`superuser`):** Acceso a todas las funciones de gestión de reportes, incluyendo edición y eliminación.
 *   **Supervisor (`supervisor`):** Puede ver todos los reportes, gestionar sus estados y acceder a las analíticas. No puede eliminar reportes ni crear usuarios.
 *   **Técnico (`user-technicians`):** Rol base para los usuarios de campo. Pueden crear y ver reportes, pero tienen acceso restringido a funciones de gestión y analíticas.
-```
+
+    
