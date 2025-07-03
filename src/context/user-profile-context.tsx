@@ -80,24 +80,31 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // This effect runs once on the client to load data from localStorage
     try {
-      const storedUsers = localStorage.getItem('camosaUserProfiles');
+      const storedUsersJSON = localStorage.getItem('camosaUserProfiles');
       const storedUserEmail = localStorage.getItem('camosaCurrentUserEmail');
-      let loadedUsers = defaultUsers;
-
-      if (storedUsers) {
-        loadedUsers = JSON.parse(storedUsers);
-        setUsers(loadedUsers);
-      } else {
-        // If nothing in storage, store the default users
-        localStorage.setItem('camosaUserProfiles', JSON.stringify(defaultUsers));
+      
+      let usersFromStorage = {};
+      if (storedUsersJSON) {
+        try {
+          usersFromStorage = JSON.parse(storedUsersJSON);
+        } catch (e) {
+          console.error("Could not parse users from localStorage", e);
+        }
       }
+
+      // Merge default users with users from storage to ensure new users are added
+      const combinedUsers = { ...defaultUsers, ...usersFromStorage };
+      setUsers(combinedUsers);
+      
+      // Persist the combined list back to localStorage
+      localStorage.setItem('camosaUserProfiles', JSON.stringify(combinedUsers));
       
       // If there was a user logged in, restore their session
-      if (storedUserEmail && loadedUsers[storedUserEmail]) {
-        setProfile(loadedUsers[storedUserEmail]);
+      if (storedUserEmail && combinedUsers[storedUserEmail]) {
+        setProfile(combinedUsers[storedUserEmail]);
       } else {
         // Otherwise, default to admin
-        setProfile(loadedUsers['ohernandez@camosa.com']);
+        setProfile(combinedUsers['ohernandez@camosa.com']);
       }
 
     } catch (error) {
